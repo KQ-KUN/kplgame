@@ -1,0 +1,9 @@
+node_modules/
+sources/
+dist/
+reports/
+config/local-sources.json
+.env
+.env.*
+*.log
+__pycache__/

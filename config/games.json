@@ -1,0 +1,21 @@
+[
+  {
+    "id": "kpl2k", "name": "KPL 2K", "repo": "KQ-KUN/kpl2k",
+    "ref": "615ae9a87c0496d533e8a17f295405a4644364b3",
+    "path": "/kpl2k/", "category": "战队经营", "description": "平行时空战队经理",
+    "accent": "red", "icon": "shared/kpl2k-mark.svg", "enabled": true,
+    "build": { "type": "static", "output": "app", "test": ["node", "tools/verify_engine.js"] }
+  },
+  {
+    "id": "guessing", "name": "KPL Guessing", "repo": "KQ-KUN/KPL-Guessing",
+    "ref": "8c66c50e9a8d6773b065489c1f74e13166cfed8e",
+    "path": "/guessing/", "category": "人物竞猜", "description": "弗一把 · KPL天才 · 人物图鉴",
+    "accent": "blue", "icon": "shared/guessing-mark.svg", "enabled": true,
+    "build": { "type": "npm", "output": "dist", "args": ["--base=./"], "test": ["npm", "test"] }
+  },
+  { "id": "link", "name": "KPL Link", "repo": "KQ-KUN/kpl-link", "path": "/link/", "category": "关系解谜", "description": "最短队友链 · KPL关系挑战", "accent": "purple", "enabled": false },
+  { "id": "timeline", "name": "KPL Timeline", "repo": "KQ-KUN/kpl-timeline", "path": "/timeline/", "category": "历史挑战", "description": "探索 KPL 赛事历史", "accent": "blue", "enabled": false },
+  { "id": "grid", "name": "KPL Grid", "repo": "KQ-KUN/kpl-grid", "path": "/grid/", "category": "条件解谜", "description": "寻找符合条件的选手", "accent": "purple", "enabled": false },
+  { "id": "draft", "name": "KPL Draft", "repo": "KQ-KUN/kpl-draft", "path": "/draft/", "category": "选秀", "description": "构建你的选秀阵容", "accent": "red", "enabled": false },
+  { "id": "lineup", "name": "KPL Lineup", "repo": "KQ-KUN/kpl-lineup", "path": "/lineup/", "category": "阵容挑战", "description": "组合你的理想阵容", "accent": "blue", "enabled": false }
+]
