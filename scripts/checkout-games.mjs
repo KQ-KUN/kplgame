@@ -8,6 +8,7 @@ for (const g of (await registry()).filter(g=>g.enabled)) {
   await fs.mkdir(dest,{recursive:true});
   run('git',['init'],dest);
   run('git',['remote','add','origin',`https://github.com/${g.repo}.git`],dest);
-  run('git',['-c','http.sslBackend=openssl','fetch','--depth','1','origin',g.ref],dest);
+  const transport=process.platform==='win32' ? ['-c','http.sslBackend=openssl'] : [];
+  run('git',[...transport,'fetch','--depth','1','origin',g.ref],dest);
   run('git',['checkout','--detach','FETCH_HEAD'],dest);
 }
