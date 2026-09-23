@@ -61,4 +61,5 @@ Portal 初始复制版首屏约 3.9 MB，主要来自两张原图。新首页使
 - EdgeOne 域名管理显示 `kplgame.cn` 已生效，CNAME 目标为 `kplgame.cn.pages.dnsoe5.com`；免费 HTTPS 证书已部署。`http://kplgame.cn/` 实测 302 跳转 `https://kplgame.cn/`，HTTPS 证书校验通过。
 - 正式域名 `/`、`/kpl2k/`、`/guessing/` 均实测 HTTP 200，返回对应页面标题。EdgeOne 临时部署的首页、2K 入口和返回总站已在浏览器操作；2K 子路径刷新复测通过，曾有一次刷新只显示导航、再次刷新恢复。Guessing 浏览器刷新及正式域名资源逐项检查未在当次验收中完成。
 - CloudBase 兼容地址的 `/`、`/kpl2k/`、`/guessing/` 上线后复查均返回 HTTP 200；未删除或改动旧站。
-- Git push → EdgeOne 自动发布链路尚待新的 `main` push 实测。中国大陆电信、联通、移动普通网络的真实可用性与体验仍为 **MANUAL ACCEPTANCE PENDING**；不能以当前运行环境的公网检查代替。
+- Git push 自动发布链路已实测通过：`main` 推送 `1f88e49acf020fd7b42daf03332d7a567059080d` 后，EdgeOne 自动创建生产部署 `dpl4alv1w4l0` 并显示成功。构建日志确认 `npm test && npm run build` 通过（平台测试 3/3、Guessing 测试 9/9、构建校验错误数 0）；部署后正式域名 `/`、`/kpl2k/`、`/guessing/` 再次返回 HTTP 200。
+- 中国大陆电信、联通、移动普通网络的真实可用性与体验仍为 **MANUAL ACCEPTANCE PENDING**；不能以当前运行环境的公网检查代替。
