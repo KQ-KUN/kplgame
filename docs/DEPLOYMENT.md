@@ -18,7 +18,7 @@
 | EdgeOne 显示的 CNAME 目标 | `kplgame.cn.pages.dnsoe5.com` |
 | HTTPS | EdgeOne 免费证书已部署；HTTP 以 302 跳转 HTTPS |
 
-2026-09-23 手动触发的生产部署 `dp9t0ryh5rc9` 已成功：日志确认 Node 版本、两个锁定游戏提交的 checkout、测试、构建、产物校验和上传。Git push 自动发布链路需以一次新的 `main` push 及其 EdgeOne 部署记录单独验收，不能仅凭“自动部署已开启”断言通过。
+2026-09-23 手动触发的生产部署 `dp9t0ryh5rc9` 已成功：日志确认 Node 版本、两个锁定游戏提交的 checkout、测试、构建、产物校验和上传。此前的 Git push 自动发布链路已由 `1f88e49acf020fd7b42daf03332d7a567059080d` 对应的 EdgeOne 部署 `dpl4alv1w4l0` 验收。本次 Link 集成提交 `2f91114e9b916952893af4b20db1c06bc9cb03d4` 已在正式域名呈现新增资源；该次 EdgeOne 部署 ID 仍待控制台核实，详见 [ACCEPTANCE](ACCEPTANCE.md)。
 
 `.github/workflows/build.yml` 也会对 `main` 执行 checkout、安装、测试、聚合与验证，上传 `kplgame-dist` 和报告；GitHub Actions 构建成功与 EdgeOne 上线分别验收。游戏源码更新后须主动更新注册表 ref，防止上游 main 无意改变正式站。构建环境必须能读取三个公开游戏仓库；`sources/` 是临时目录，不能复用脏 checkout。
 
@@ -28,7 +28,7 @@
 
 [域名说明](https://pages.edgeone.ai/document/domain-overview) 当前指出：中国大陆访问项目/部署默认域名需使用有效期 3 小时的预览 URL；稳定入口应绑定自定义域名。全球可用区（不含中国大陆）不要求 ICP 注册；含大陆区域要求备案。见 [自定义域名](https://pages.edgeone.ai/document/custom-domain)。这些是平台规则，不代表已证明 kplgame.cn 在所有大陆网络质量达标。
 
-上线验收要在普通大陆网络（至少移动与固定宽带）测首页、两个子目录直接访问/刷新、加载和完整玩法；记录日期、网络、首屏耗时、失败请求。核心资源自托管可以减少境外依赖，但不能保证跨境链路质量。默认域名能访问也不能替代自定义域名验收。
+上线验收要在普通大陆网络（至少移动与固定宽带）测首页、三个子目录直接访问/刷新、加载和完整玩法；记录日期、网络、首屏耗时、失败请求。核心资源自托管可以减少境外依赖，但不能保证跨境链路质量。默认域名能访问也不能替代自定义域名验收。
 
 ## CloudBase 与回滚
 
