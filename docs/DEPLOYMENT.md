@@ -20,7 +20,7 @@
 
 2026-09-23 手动触发的生产部署 `dp9t0ryh5rc9` 已成功：日志确认 Node 版本、两个锁定游戏提交的 checkout、测试、构建、产物校验和上传。Git push 自动发布链路需以一次新的 `main` push 及其 EdgeOne 部署记录单独验收，不能仅凭“自动部署已开启”断言通过。
 
-`.github/workflows/build.yml` 也会对 `main` 执行 checkout、安装、测试、聚合与验证，上传 `kplgame-dist` 和报告；GitHub Actions 构建成功与 EdgeOne 上线分别验收。游戏源码更新后须主动更新注册表 ref，防止上游 main 无意改变正式站。构建环境必须能读取两个公开游戏仓库；`sources/` 是临时目录，不能复用脏 checkout。
+`.github/workflows/build.yml` 也会对 `main` 执行 checkout、安装、测试、聚合与验证，上传 `kplgame-dist` 和报告；GitHub Actions 构建成功与 EdgeOne 上线分别验收。游戏源码更新后须主动更新注册表 ref，防止上游 main 无意改变正式站。构建环境必须能读取三个公开游戏仓库；`sources/` 是临时目录，不能复用脏 checkout。
 
 域名和免费 HTTPS 已接入；后续 DNS 变更只使用控制台实际给出的记录值，不猜目标，也不购买商业 SSL。
 

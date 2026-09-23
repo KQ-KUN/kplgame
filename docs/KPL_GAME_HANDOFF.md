@@ -6,8 +6,9 @@ KPL GAME 是非官方粉丝自制的静态小游戏平台，正式入口为 `htt
 | --- | --- | --- |
 | KQ-KUN/kpl2k | 2K 游戏、canonical 数据生产与清洗 | /kpl2k/ |
 | KQ-KUN/KPL-Guessing | Guessing 唯一正式业务源码、题库与独立构建 | /guessing/ |
+| KQ-KUN/kpl-link | Link 历史队友关系游戏、独立测试与构建 | /link/ |
 | KQ-KUN/kplgame | Portal、规范、注册表、聚合构建、统一发布 | / |
-| kpl-link / kpl-timeline / kpl-grid / kpl-draft / kpl-lineup | 后续独立游戏，未通过接入验收前禁用 | 对应子路径 |
+| kpl-timeline / kpl-grid / kpl-draft / kpl-lineup | 后续独立游戏，未通过接入验收前禁用 | 对应子路径 |
 
 开始新游戏前读 [数据交接](DATA_HANDOFF.md)、[UI 规范](UI_STANDARD.md)、[接入协议](GAME_INTEGRATION.md)，复制 `templates/NEW_GAME_AGENTS.md`，逐项执行 [新游戏清单](NEW_GAME_CHECKLIST.md)。禁止为了建新游戏重抓已有数据、假设名字等于人物 ID、修改其他游戏内部实现。
 

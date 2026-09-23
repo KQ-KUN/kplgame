@@ -63,3 +63,11 @@ Portal 初始复制版首屏约 3.9 MB，主要来自两张原图。新首页使
 - CloudBase 兼容地址的 `/`、`/kpl2k/`、`/guessing/` 上线后复查均返回 HTTP 200；未删除或改动旧站。
 - Git push 自动发布链路已实测通过：`main` 推送 `1f88e49acf020fd7b42daf03332d7a567059080d` 后，EdgeOne 自动创建生产部署 `dpl4alv1w4l0` 并显示成功。构建日志确认 `npm test && npm run build` 通过（平台测试 3/3、Guessing 测试 9/9、构建校验错误数 0）；部署后正式域名 `/`、`/kpl2k/`、`/guessing/` 再次返回 HTTP 200。
 - 中国大陆电信、联通、移动普通网络的真实可用性与体验仍为 **MANUAL ACCEPTANCE PENDING**；不能以当前运行环境的公网检查代替。
+
+## KPL Link 接入验收（2026-09-23，平台待发布）
+
+- Link 独立公开仓库为 `KQ-KUN/kpl-link`，生产分支 `main`；已推送并锁定完整 SHA `c45134534ab61431263ea5ad7ac5a15bc9fc2f8d`，远端 `refs/heads/main` 与本地一致。
+- Link 独立 `npm ci`、13 项测试、TypeScript 检查及 Vite build 通过；输出入口 `dist/index.html`，`base: './'`。730 张头像与选手/图谱 JSON 作为 Link 自有静态快照，未依赖 `/kpl2k/` 私有资源。
+- 在新的平台克隆中从 GitHub 执行 `npm run checkout`，三个实际 ref 均与注册表一致且工作区干净；`npm run install:games`、平台 3 项测试、2K 引擎验证、Guessing 9 项、Link 13 项、聚合 build 和单独 validate 全部通过。`dist/index.html`、`dist/kpl2k/index.html`、`dist/guessing/index.html`、`dist/link/index.html` 均存在，校验错误 0。
+- 本地浏览器 390/768/1366px 检查 Portal 三张卡、Link 直接访问与刷新，均无文档横向溢出；Link 完成全员搜索、断链查看答案、加入正确中间选手并获得最短路径、返回 `/` 的流程。Portal 初始请求未预载游戏数据；2K 与 Guessing 子路径本地直达和刷新为 200。
+- 平台 `main` 推送、EdgeOne 新部署 ID、生产 `/link/` 玩法及大陆运营商网络验收仍待后续步骤；本轮未购买任何服务、未修改 EdgeOne 或 DNS。

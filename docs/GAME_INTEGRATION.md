@@ -2,7 +2,7 @@
 
 每个游戏独立仓库、独立业务源码、独立测试；统一输出目录默认 `dist/`。Vite 使用 `base: './'` 或注册表对应子路径，所有 CSS url、JSON fetch、字体、音频、favicon、dynamic import、worker 都须在子路径中有效。静态多页面使用真实文件，不用将所有 404 重写成 Portal。
 
-`config/games.json` 是唯一注册表。启用项必须有 id、name、repo、40 位 ref commit、path、category、description、accent、icon、enabled、build。build.type 为 npm 或 static，output 是游戏仓库内路径，test 为命令参数数组。ref 锁定真实 GitHub commit，升级需更新 ref 并重新验收。禁用项不拉取、不构建、不出卡片。本轮 Link 保持禁用。
+`config/games.json` 是唯一注册表。启用项必须有 id、name、repo、40 位 ref commit、path、category、description、accent、icon、enabled、build。build.type 为 npm 或 static，output 是游戏仓库内路径，test 为命令参数数组。ref 锁定真实 GitHub commit，升级需更新 ref 并重新验收。禁用项不拉取、不构建、不出卡片。Link 已按远端提交锁定并启用；Timeline、Grid、Draft、Lineup 仍禁用。
 
 ## 从零构建
 
@@ -26,7 +26,7 @@ checkout 根据启用注册项逐个克隆到忽略目录 sources/ 并锁定 ref
 
 路径相对平台根目录。此覆盖只用于本地，禁止入库；reports/build-manifest.json 会记录实际 ref 和 dirty，CI 不接受版本偏差。
 
-## 当前两个游戏
+## 既有两个游戏
 
 KPL 2K 是无需打包器的独立静态游戏，`app/` 已包括运行所需数据和资源。平台 static adapter 复制 app，相当于其独立发布构建；不运行根 npm build（该命令仍属于旧 Hub，且会生成 Link）。独立开发可用原 `tools/serve_local.py`，独立逻辑测试 `node tools/verify_engine.js`。更新数据用原数据流水线，不能在平台发布时自动抓取。
 

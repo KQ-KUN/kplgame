@@ -232,4 +232,5 @@ body::before {
 .site-footer { margin-top:32px; text-align:center; color:var(--muted); font-size:12px; line-height:1.8; }
 .announcement-back { min-height:44px; }
 @media(max-width:760px) { .game-card { border-radius:20px; } .game-grid { grid-template-columns:1fr; } }
+@media(min-width:761px) and (max-width:1103px) { .game-card:last-child:nth-child(odd) { grid-column:1 / -1; width:calc(50% - 12px); justify-self:center; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; } }
