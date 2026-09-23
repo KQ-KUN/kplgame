@@ -1,6 +1,6 @@
 # KPL GAME
 
-非官方粉丝自制小游戏平台。玩家入口计划为 https://kplgame.cn；每个游戏独立仓库，本仓库维护 Portal、规范、注册表、聚合构建与统一发布。
+非官方粉丝自制小游戏平台。正式玩家入口为 https://kplgame.cn；每个游戏独立仓库，本仓库维护 Portal、规范、注册表、聚合构建与统一发布。
 
 先读 [总交接](docs/KPL_GAME_HANDOFF.md)。开发接入见 [GAME_INTEGRATION](docs/GAME_INTEGRATION.md)，部署见 [DEPLOYMENT](docs/DEPLOYMENT.md)，当前实际状态见 [ACCEPTANCE](docs/ACCEPTANCE.md)。
 

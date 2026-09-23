@@ -1,20 +1,28 @@
 # 发布与回滚
 
-计划正式入口 `https://kplgame.cn`；CloudBase 长网址保留为兼容/备用站。本轮不创建云资源、不修改 DNS、不购买任何产品、不改变 CloudBase 设置，不推送旧 kpl2k main 触发它的旧自动部署。
+生产入口为 `https://kplgame.cn`；CloudBase 长网址保留为兼容/备用站。不购买收费产品、不改变 CloudBase 设置，也不推送旧 kpl2k main 触发它的旧自动部署。
 
-## 已实现与待配置
+## 当前生产配置（2026-09-23）
 
-`.github/workflows/build.yml` 自动执行源码 checkout、安装、测试、聚合、验证，上传 kplgame-dist 与报告。它只构建，不冒充已部署 EdgeOne。游戏源码更新后需主动更新注册表 ref（防止上游 main 无意破坏正式站）。
+| 项目 | 实际值 |
+| --- | --- |
+| EdgeOne Makers 项目 | `kplgame2` |
+| 加速区域 | 全球可用区（不含中国大陆） |
+| Git 仓库 / 生产分支 | `KQ-KUN/kplgame` / `main` |
+| 框架 / 根目录 | Other / `./` |
+| Node.js | `24.18.0` |
+| 安装命令 | `npm run checkout && npm run install:games` |
+| 构建命令 | `npm test && npm run build` |
+| 输出目录 | `dist` |
+| 正式域名 | `https://kplgame.cn` |
+| EdgeOne 显示的 CNAME 目标 | `kplgame.cn.pages.dnsoe5.com` |
+| HTTPS | EdgeOne 免费证书已部署；HTTP 以 302 跳转 HTTPS |
 
-首次接入由用户在 EdgeOne Pages / Makers 控制台选择 **全球可用区（不含中国大陆）**，核对当时可用的免费额度/限制；任何收费步骤停止。可以先上传 GitHub Actions 的 dist 内容验证；Git 集成的项目根目录为本仓库根，构建命令为：
+2026-09-23 手动触发的生产部署 `dp9t0ryh5rc9` 已成功：日志确认 Node 版本、两个锁定游戏提交的 checkout、测试、构建、产物校验和上传。Git push 自动发布链路需以一次新的 `main` push 及其 EdgeOne 部署记录单独验收，不能仅凭“自动部署已开启”断言通过。
 
-```sh
-npm run checkout && npm run install:games && npm test && npm run build
-```
+`.github/workflows/build.yml` 也会对 `main` 执行 checkout、安装、测试、聚合与验证，上传 `kplgame-dist` 和报告；GitHub Actions 构建成功与 EdgeOne 上线分别验收。游戏源码更新后须主动更新注册表 ref，防止上游 main 无意改变正式站。构建环境必须能读取两个公开游戏仓库；`sources/` 是临时目录，不能复用脏 checkout。
 
-输出目录 `dist`，Node.js 24。必须允许构建环境读取两个公开源仓库。源码 sources/ 为临时目录；若提供商持久缓存它，应取消该目录缓存或在全新构建环境运行，不能直接覆写脏 checkout。
-
-控制台选择 Git 集成后可实现 push kplgame → 构建/测试 → 发布；当前未绑定账户和域名，因此不能声称该链路已线上跑通。先验证临时部署，再添加 kplgame.cn，按控制台给出的准确记录手动设置 DNS，不猜 CNAME 值，不购买 SSL。
+域名和免费 HTTPS 已接入；后续 DNS 变更只使用控制台实际给出的记录值，不猜目标，也不购买商业 SSL。
 
 ## 大陆访问事实与限制（2026-09-21 核对官方文档）
 
@@ -26,4 +34,4 @@ npm run checkout && npm run install:games && npm test && npm run build
 
 已知兼容地址：`https://kpl2k-kpl2k-d0gigrx6e89914f65.webapps.tcloudbase.com`。旧说明可能写目标 app，也可能已迁移为完整 dist；以控制台和真实响应为准。本轮保留旧 portal、guessing、link、根 package/build 配置，不以新平台状态判断旧站健康。
 
-上线前记录旧站 `/`、`/kpl2k/`、`/guessing/` 状态。上线后复查。新站失败时回滚到上一份已验证的 dist 或上一个平台 commit + 锁定游戏 refs；不要删旧部署。只有新体系和线上入口均验收成功，另行讨论清理。
+2026-09-23 上线后旧站 `/`、`/kpl2k/`、`/guessing/` 均返回 HTTP 200。新站失败时回滚到上一份已验证的 dist 或上一个平台 commit + 锁定游戏 refs；不要删旧部署。只有新体系和线上入口均验收成功，另行讨论清理。

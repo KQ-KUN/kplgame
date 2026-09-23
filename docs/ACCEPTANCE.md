@@ -1,6 +1,6 @@
 # 平台化整理验收（2026-09-22）
 
-状态：本地平台构建与主要交互通过；GitHub 发布状态见仓库 Actions；kplgame.cn 尚未绑定/部署，不宣称正式上线。旧站保留。以下逐项回答原需求。
+状态：`https://kplgame.cn` 已通过 EdgeOne 上线，CloudBase 旧站保留。2026-09-22 的平台化整理验收记录如下；生产状态更新见文末。
 
 ## 当前与职责
 
@@ -50,7 +50,15 @@ Portal 初始复制版首屏约 3.9 MB，主要来自两张原图。新首页使
 ## 部署与清理
 
 18. CloudBase `https://kpl2k-kpl2k-d0gigrx6e89914f65.webapps.tcloudbase.com` 的 `/`、`/kpl2k/`、`/guessing/` 实测 HTTP 200，分别返回总站、2K、Guessing 标题。未更改部署设置、旧源码或推送旧仓库；HTTP 验证不等于全量线上玩法复测。
-19. kplgame.cn 接入仍需用户在 EdgeOne/Makers 控制台关联仓库，选择合适免费方案与全球区（不含大陆），配置 Node24、构建命令、dist，然后按控制台提供的记录绑定域名/DNS并验收。详见 [DEPLOYMENT](DEPLOYMENT.md)。当前未部署新云项目、未改 DNS。
+19. 2026-09-23 已将 `kplgame.cn` 接入 EdgeOne Makers 生产环境；当前配置和上线证据见下方及 [DEPLOYMENT](DEPLOYMENT.md)。
 20. 未购买服务器、数据库、CDN、SSL 或其他收费资源；GitHub Actions 与托管的实际免费额度由账户/提供商当前规则决定，本轮未购买额度。
 21. 没有旧关键源码获准删除。dist 可重建，但不需要为目录整洁主动删除；tmp 中本轮 clone/cache 可由用户确认后清理。
 22. 原 portal、guessing、link、数据、根构建和小工具全部保留。尤其 tools/player_icons.py 仍依赖 guessing/public；新正式站验收与该依赖解耦之前，不删除兼容副本。
+
+## 生产上线状态（2026-09-23）
+
+- EdgeOne 项目 `kplgame2` 位于全球可用区（不含中国大陆），关联 `KQ-KUN/kplgame` 的 `main`。手动触发的生产部署 `dp9t0ryh5rc9` 成功；构建日志确认 Node.js 24.18.0、`npm run checkout && npm run install:games`、`npm test && npm run build`、`dist` 产物校验与上传均完成，校验错误数为 0。
+- EdgeOne 域名管理显示 `kplgame.cn` 已生效，CNAME 目标为 `kplgame.cn.pages.dnsoe5.com`；免费 HTTPS 证书已部署。`http://kplgame.cn/` 实测 302 跳转 `https://kplgame.cn/`，HTTPS 证书校验通过。
+- 正式域名 `/`、`/kpl2k/`、`/guessing/` 均实测 HTTP 200，返回对应页面标题。EdgeOne 临时部署的首页、2K 入口和返回总站已在浏览器操作；2K 子路径刷新复测通过，曾有一次刷新只显示导航、再次刷新恢复。Guessing 浏览器刷新及正式域名资源逐项检查未在当次验收中完成。
+- CloudBase 兼容地址的 `/`、`/kpl2k/`、`/guessing/` 上线后复查均返回 HTTP 200；未删除或改动旧站。
+- Git push → EdgeOne 自动发布链路尚待新的 `main` push 实测。中国大陆电信、联通、移动普通网络的真实可用性与体验仍为 **MANUAL ACCEPTANCE PENDING**；不能以当前运行环境的公网检查代替。
