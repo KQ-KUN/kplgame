@@ -58,8 +58,14 @@ async function resetGeneratedSources(games) {
     if(!entry) continue;
     if(!entry.isDirectory() || entry.isSymbolicLink()) throw new Error(`拒绝清除非普通目录: ${dir}`);
     if(path.resolve(git(dir,'rev-parse','--show-toplevel'))!==dir) throw new Error(`拒绝清除非独立 checkout: ${dir}`);
-    const actual=git(dir,'rev-parse','HEAD');
-    if(actual!==game.ref) throw new Error(`临时源码版本与注册表不符，拒绝清除: ${dir}`);
+    const head=spawnSync('git',['rev-parse','--verify','HEAD'],{cwd:dir,encoding:'utf8'});
+    if(head.error) throw head.error;
+    const actual=head.status===0 ? head.stdout.trim() : null;
+    const incomplete=actual===null;
+    if(incomplete) {
+      gitRemote(dir,game.repo);
+      if((await fs.readdir(dir)).some(name=>name!=='.git')) throw new Error(`未完成 checkout 含未知文件，拒绝清除: ${dir}`);
+    } else if(actual!==game.ref) throw new Error(`临时源码版本与注册表不符，拒绝清除: ${dir}`);
     if(dirtyFiles(dir).length) throw new Error(`临时源码包含未提交文件，拒绝清除: ${dir}`);
     await fs.rm(dir,{recursive:true});
   }

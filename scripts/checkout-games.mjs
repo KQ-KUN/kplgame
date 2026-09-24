@@ -9,6 +9,13 @@ for (const g of (await registry()).filter(g=>g.enabled)) {
   run('git',['init'],dest);
   run('git',['remote','add','origin',`https://github.com/${g.repo}.git`],dest);
   const transport=process.platform==='win32' ? ['-c','http.sslBackend=openssl'] : [];
-  run('git',[...transport,'fetch','--depth','1','origin',g.ref],dest);
+  for(let attempt=1;attempt<=3;attempt++) {
+    try {run('git',[...transport,'fetch','--depth','1','origin',g.ref],dest);break;}
+    catch(error) {
+      if(attempt===3) throw error;
+      console.warn(`${g.id} fetch 失败，${attempt * 2} 秒后重试 (${attempt}/3)`);
+      await new Promise(resolve=>setTimeout(resolve,attempt * 2_000));
+    }
+  }
   run('git',['checkout','--detach','FETCH_HEAD'],dest);
 }
