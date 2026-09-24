@@ -1,0 +1,68 @@
+import {pathToFileURL} from 'node:url';
+import {registry} from './common.mjs';
+
+export const productionOrigin='https://kplgame.cn';
+const criticalExtensions=/\.(?:js|css|json)$/i;
+
+export function pageResources(html,pageURL) {
+  const urls=new Set();
+  for(const match of html.matchAll(/<(?:script|link)\b[^>]*\b(?:src|href)\s*=\s*["']([^"']+)["'][^>]*>/gi)) {
+    try {
+      const url=new URL(match[1],pageURL);
+      if(url.origin===new URL(pageURL).origin && criticalExtensions.test(url.pathname)) urls.add(url.href);
+    } catch { /* Invalid noncritical markup is handled by build validation. */ }
+  }
+  return [...urls];
+}
+
+export async function smokeProduction({origin=productionOrigin,games,fetcher=fetch}={}) {
+  const entries=games ?? (await registry()).filter(game=>game.enabled);
+  const failures=[],warnings=[],checked=[];
+  const pages=['/',...entries.map(game=>game.path)];
+  for(const page of pages) {
+    const pageURL=new URL(page,origin).href;
+    let response;
+    try { response=await fetcher(pageURL,{cache:'no-store',signal:AbortSignal.timeout(15_000)}); }
+    catch(error) { failures.push(`${page}: ${error.message}`); continue; }
+    if(response.status!==200) { failures.push(`${page}: HTTP ${response.status}`); continue; }
+    const html=await response.text();
+    checked.push(page);
+    if(!/<html\b/i.test(html)) failures.push(`${page}: 响应不是 HTML`);
+    for(const resource of pageResources(html,pageURL)) {
+      try {
+        const asset=await fetcher(resource,{cache:'no-store',signal:AbortSignal.timeout(15_000)});
+        if(asset.status!==200) failures.push(`${resource}: HTTP ${asset.status}`);
+        else {
+          checked.push(resource);
+          // Check literal JSON loads in the page's first-party JS.
+          if(new URL(resource).pathname.endsWith('.js')) {
+            const js=await asset.text();
+            for(const match of js.matchAll(/fetch\(\s*["'`]([^"'`]+\.json(?:\?[^"'`]*)?)["'`]/g)) {
+              const jsonURL=new URL(match[1],pageURL);
+              if(jsonURL.origin!==new URL(origin).origin) continue;
+              const data=await fetcher(jsonURL,{cache:'no-store',signal:AbortSignal.timeout(15_000)});
+              if(data.status!==200) failures.push(`${jsonURL.href}: HTTP ${data.status}`);
+              else checked.push(jsonURL.href);
+            }
+          }
+        }
+      } catch(error) { failures.push(`${resource}: ${error.message}`); }
+    }
+    for(const match of html.matchAll(/<link\b[^>]*\brel\s*=\s*["'](?:icon|shortcut icon)["'][^>]*\bhref\s*=\s*["']([^"']+)["']/gi)) {
+      const iconURL=new URL(match[1],pageURL);
+      if(iconURL.origin!==new URL(origin).origin) continue;
+      try {
+        const icon=await fetcher(iconURL,{cache:'no-store',signal:AbortSignal.timeout(15_000)});
+        if(icon.status!==200) warnings.push(`${iconURL.href}: HTTP ${icon.status}`);
+      } catch(error) {warnings.push(`${iconURL.href}: ${error.message}`);}
+    }
+  }
+  const result={ok:failures.length===0,checked,failures,warnings};
+  console.log(JSON.stringify(result,null,2));
+  if(!result.ok) throw new Error(`生产 smoke 失败: ${failures.join('; ')}`);
+  return result;
+}
+
+if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href) {
+  smokeProduction().catch(error=>{console.error(error.message);process.exitCode=1;});
+}

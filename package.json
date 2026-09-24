@@ -10,6 +10,7 @@
     "build": "node scripts/build-all.mjs",
     "collect": "node scripts/collect-games.mjs",
     "validate": "node scripts/validate-build.mjs",
+    "release:game": "node scripts/release-game.mjs",
     "test": "node --test tests/*.test.mjs && node scripts/build-all.mjs --test-only",
     "serve": "node scripts/serve.mjs"
   }

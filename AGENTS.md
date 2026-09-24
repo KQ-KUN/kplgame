@@ -11,3 +11,10 @@
 - `sources/`、`dist/`、`reports/` 是忽略目录。不得提交凭据、本地路径、环境文件或游戏源码副本。
 - 注册表启用项必须构建和测试通过；发布前验证子路径、资源、移动交互及线上入口。构建成功不等于部署成功。
 - 旧 `portal/`、`guessing/` 的删除须在新站验收后另行决定。本轮不开发 Link。
+
+## 已有游戏的常规发布
+
+- 优先使用 `npm run release:game -- <game-id>`；Codex 先核对游戏改动范围，未提交文件逐个用 `--file=相对路径` 列明。先执行 `--dry-run`，再执行正式发布。
+- 常规发布由脚本完成游戏 test/typecheck/build、SSH push、远端 SHA 校验、注册表更新、远端聚合验证、平台 push、生产版本等待与 smoke；不要求用户手动操作终端、GitHub 或 EdgeOne，不索取 deployment ID。
+- 不为普通游戏更新改写 `docs/ACCEPTANCE.md`、`docs/DEPLOYMENT.md`、`docs/KPL_GAME_HANDOFF.md`；结果记录在忽略目录 `reports/release-latest.json`。
+- 仅当权限缺失、SSH 凭据失效、收费操作、破坏性数据操作或安全敏感操作确实阻断流程时请用户介入；不得通过关闭安全设置或手动 EdgeOne 部署绕过失败。

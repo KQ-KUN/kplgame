@@ -36,7 +36,7 @@ export function validateRegistry(games) {
 }
 export const registry = async () => validateRegistry(await readJSON(path.join(root,'config/games.json')));
 export async function sourceFor(g) {
-  const local = await readJSON(path.join(root,'config/local-sources.json')).catch(e => { if (e.code === 'ENOENT') return {}; throw e; });
+  const local = process.env.KPL_IGNORE_LOCAL_SOURCES === '1' ? {} : await readJSON(path.join(root,'config/local-sources.json')).catch(e => { if (e.code === 'ENOENT') return {}; throw e; });
   return path.resolve(root, local[g.id] || `sources/${g.id}`);
 }
 export function run(command, args, cwd, capture = false) {

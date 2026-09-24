@@ -37,4 +37,7 @@ for(const {g,source} of sources) {
 }
 await fs.mkdir(path.join(root,'reports'),{recursive:true});
 await fs.writeFile(path.join(root,'reports/build-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
+const platformCommit=run('git',['rev-parse','HEAD'],root,true);
+if(!/^[a-f0-9]{40}$/.test(platformCommit)) throw new Error('无法读取平台 commit');
+await fs.writeFile(path.join(dist,'release-meta.json'),JSON.stringify({schemaVersion:1,platformCommit,games:Object.fromEntries(games.map(g=>[g.id,g.ref]))},null,2)+'\n');
 console.log(`已收集 ${games.length} 个独立游戏到 dist/`);
