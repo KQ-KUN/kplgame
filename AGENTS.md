@@ -15,6 +15,6 @@
 ## 已有游戏的常规发布
 
 - 优先使用 `npm run release:game -- <game-id>`；Codex 先核对游戏改动范围，未提交文件逐个用 `--file=相对路径` 列明。先执行 `--dry-run`，再执行正式发布。
-- 常规发布由脚本完成游戏 test/typecheck/build、SSH push、远端 SHA 校验、注册表更新、远端聚合验证、平台 push、生产版本等待与 smoke；不要求用户手动操作终端、GitHub 或 EdgeOne，不索取 deployment ID。
+- 常规发布由脚本完成非交互 Git 认证预检、游戏 test/typecheck/build、Git push、远端 SHA 校验、注册表更新、远端聚合验证、平台 push、生产版本等待与 smoke；HTTPS 与 SSH 均可，不要求用户手动操作终端、GitHub 或 EdgeOne，不索取 deployment ID。
 - 不为普通游戏更新改写 `docs/ACCEPTANCE.md`、`docs/DEPLOYMENT.md`、`docs/KPL_GAME_HANDOFF.md`；结果记录在忽略目录 `reports/release-latest.json`。
-- 仅当权限缺失、SSH 凭据失效、收费操作、破坏性数据操作或安全敏感操作确实阻断流程时请用户介入；不得通过关闭安全设置或手动 EdgeOne 部署绕过失败。
+- 不得仅因 origin 使用 HTTPS 就要求用户配置 SSH、登录 GitHub 或运行终端命令。只有认证预检明确返回 `AUTH_REQUIRED` 时才要求重新认证；权限缺失、收费操作、破坏性数据操作或安全敏感操作也须按具体影响请用户介入。不得通过关闭安全设置或手动 EdgeOne 部署绕过失败。

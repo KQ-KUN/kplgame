@@ -4,6 +4,7 @@ import {spawnSync} from 'node:child_process';
 import {root,registry,run,readJSON} from './common.mjs';
 import {waitForProduction,shaPattern} from './wait-production.mjs';
 import {smokeProduction} from './smoke-production.mjs';
+import {checkGitAuth,gitNetwork} from './check-git-auth.mjs';
 
 const args=process.argv.slice(2);
 const gameId=args.find(arg=>!arg.startsWith('--'));
@@ -17,10 +18,9 @@ const gitRemote=(cwd,repo)=>{
   const fetch=git(cwd,'remote','get-url','origin');
   if(![`https://github.com/${repo}.git`,`git@github.com:${repo}.git`].includes(fetch)) throw new Error(`origin fetch URL 与 ${repo} 不符: ${fetch}`);
 };
-const pushIsSSH=(cwd,repo)=>git(cwd,'remote','get-url','--push','origin')===`git@github.com:${repo}.git`;
-const remoteMain=cwd=>{
-  const transport=process.platform==='win32' && git(cwd,'remote','get-url','origin').startsWith('https://') ? ['-c','http.sslBackend=openssl'] : [];
-  const output=git(cwd,...transport,'ls-remote','origin','refs/heads/main');
+const remoteMain=async cwd=>{
+  const remoteURL=git(cwd,'remote','get-url','origin');
+  const output=await gitNetwork(cwd,['ls-remote','origin','refs/heads/main'],{remoteURL});
   const match=output.match(/^([a-f0-9]{40})\s+refs\/heads\/main$/);
   if(!match) throw new Error('无法从 origin 查询 main 的完整 SHA');
   return match[1];
@@ -97,7 +97,14 @@ async function main() {
   if(changed.some(file=>!allowed.has(file.replaceAll('\\','/'))) || releaseFiles.some(file=>!changed.some(item=>samePath(item,file)))) throw new Error(`游戏改动与 --file 清单不一致: ${changed.join(', ') || '无改动'}`);
   if(new Set(releaseFiles).size!==releaseFiles.length) throw new Error('--file 不得重复');
   record('source',source);
-  const previousRemote=remoteMain(source);
+  let sourceAuth;
+  for(const [name,dir,repo] of [['game',source,game.repo],['platform',root,'KQ-KUN/kplgame']]) {
+    const result=await checkGitAuth(dir,repo);
+    record(`${name}-auth`,result.status);
+    if(result.status!=='AUTH_OK') throw new Error(`${result.status}: ${repo} 非交互 Git push 预检失败`);
+    if(name==='game') sourceAuth=result;
+  }
+  const previousRemote=sourceAuth.remoteSha;
   record('game-remote-before',previousRemote);
   run(game.build.test[0],game.build.test.slice(1),source);
   record('game-test','passed');
@@ -109,7 +116,6 @@ async function main() {
   record('game-build','passed');
   let newRef=previousRemote;
   if(!dryRun) {
-    if(!pushIsSSH(source,game.repo) || !pushIsSSH(root,'KQ-KUN/kplgame')) throw new Error('游戏与平台 origin push URL 必须先配置为 GitHub SSH');
     if(releaseFiles.length) {
       run('git',['add','--',...releaseFiles],source);
       const staged=rawGit(source,['diff','--cached','--name-only','-z']).split('\0').filter(Boolean);
@@ -118,8 +124,8 @@ async function main() {
     }
     const localHead=git(source,'rev-parse','HEAD');
     if(!shaPattern.test(localHead)) throw new Error('游戏 HEAD 无效');
-    run('git',['push','origin','main'],source);
-    newRef=remoteMain(source);
+    await gitNetwork(source,['push','origin','main'],{remoteURL:git(source,'remote','get-url','--push','origin'),timeoutMs:180_000});
+    newRef=await remoteMain(source);
     if(newRef!==localHead) throw new Error('游戏远端 main 与刚推送的 HEAD 不一致');
     record('game-push',newRef);
   }
@@ -145,8 +151,8 @@ async function main() {
       registryCommitted=true;
     }
     const platformHead=git(root,'rev-parse','HEAD');
-    run('git',['push','origin','main'],root);
-    const platformRemote=remoteMain(root);
+    await gitNetwork(root,['push','origin','main'],{remoteURL:git(root,'remote','get-url','--push','origin'),timeoutMs:180_000});
+    const platformRemote=await remoteMain(root);
     if(platformRemote!==platformHead) throw new Error('平台远端 main 与刚推送的 HEAD 不一致');
     record('platform-push',platformRemote);
     await waitForProduction(platformRemote);
