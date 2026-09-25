@@ -4,7 +4,8 @@ import {spawnSync} from 'node:child_process';
 import {root,registry,run,readJSON} from './common.mjs';
 import {waitForProduction,shaPattern} from './wait-production.mjs';
 import {smokeProduction} from './smoke-production.mjs';
-import {checkGitAuth,gitNetwork} from './check-git-auth.mjs';
+import {checkGitAuth} from './check-git-auth.mjs';
+import {gitNetwork} from './git-network.mjs';
 
 const args=process.argv.slice(2);
 const gameId=args.find(arg=>!arg.startsWith('--'));
@@ -101,7 +102,8 @@ async function main() {
   for(const [name,dir,repo] of [['game',source,game.repo],['platform',root,'KQ-KUN/kplgame']]) {
     const result=await checkGitAuth(dir,repo);
     record(`${name}-auth`,result.status);
-    if(result.status!=='AUTH_OK') throw new Error(`${result.status}: ${repo} 非交互 Git push 预检失败`);
+    if(result.status==='CREDENTIAL_CONTEXT_MISMATCH') throw new Error(`${result.status}: 当前执行上下文无法访问已有 Git 凭据；Codex 应自动在正常登录用户上下文重新运行发布命令，不需重新登录`);
+    if(result.status!=='AUTH_OK') throw new Error(`${result.status}: ${repo} 非交互 Git push 预检失败${result.status==='AUTH_REQUIRED'?'（已在正常用户上下文确认）':''}`);
     if(name==='game') sourceAuth=result;
   }
   const previousRemote=sourceAuth.remoteSha;
