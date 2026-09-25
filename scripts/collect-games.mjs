@@ -13,7 +13,7 @@ if(dist!==path.join(root,'dist')) throw new Error('输出保护失败');
 await fs.rm(dist,{recursive:true,force:true});
 await fs.cp(path.join(root,'portal'),dist,{recursive:true});
 await fs.cp(path.join(root,'public'),dist,{recursive:true});
-const cards=games.map(g=>`<a class="game-card game-card--${g.accent}" href="${e(g.path)}?theme=light"><span class="card-glow" aria-hidden="true"></span><span class="avatar-wrap"><img src="/${e(g.icon)}" alt="" width="82" height="82"></span><span class="card-copy"><span class="game-type">${e(g.category)}</span><strong>${e(g.name)}</strong><span class="game-desc">${e(g.description)}</span></span><span class="enter">进入游戏 <b aria-hidden="true">→</b></span></a>`).join('\n');
+const cards=games.map(g=>`<a class="game-card game-card--${g.accent}" href="${e(g.path)}"><span class="card-glow" aria-hidden="true"></span><span class="avatar-wrap"><img src="/${e(g.icon)}" alt="" width="82" height="82"></span><span class="card-copy"><span class="game-type">${e(g.category)}</span><strong>${e(g.name)}</strong><span class="game-desc">${e(g.description)}</span></span><span class="enter">进入游戏 <b aria-hidden="true">→</b></span></a>`).join('\n');
 let html=await fs.readFile(path.join(dist,'index.html'),'utf8');
 for(const [key,value] of Object.entries({name:site.name,title:site.title,description:site.description,disclaimer:site.disclaimer})) html=html.replaceAll(`{{${key}}}`,e(value));
 html=html.replace('{{games}}',cards);
