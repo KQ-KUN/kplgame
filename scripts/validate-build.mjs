@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {root,dist,files,registry} from './common.mjs';
+import {auditHtml,auditScript,auditStylesheet,expectedHeaders} from './runtime-security.mjs';
 
 export function resolveAsset(base, reference, output=dist) {
   if (!reference || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(reference)) return null;
@@ -15,6 +16,9 @@ export async function validate(output=dist) {
   const games=(await registry()).filter(g=>g.enabled);
   const all=await files(output);
   const errors=[], external=new Set();
+  for(const key of ['content-security-policy','x-content-type-options','referrer-policy','permissions-policy','strict-transport-security']) {
+    if(!expectedHeaders[key]) errors.push(`缺少安全响应头: ${key}`);
+  }
   const forbidden=/(?:fonts\.googleapis\.com|fonts\.gstatic\.com|cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com)/i;
   const totals={portal:{},...Object.fromEntries(games.map(g=>[g.id,{}]))};
   const resources=[];
@@ -43,6 +47,11 @@ export async function validate(output=dist) {
     resources.push({path:rel,bytes});
     if(!['.html','.css','.js','.json'].includes(ext)) continue;
     const text=await fs.readFile(file,'utf8');
+    const pageURL=new URL(rel,'https://kplgame.cn/').href;
+    const security={pageURL,owner,origin:'https://kplgame.cn'};
+    if(ext==='.html') errors.push(...auditHtml(text,security).map(error=>`${rel}: ${error}`));
+    if(ext==='.css') errors.push(...auditStylesheet(text,security).map(error=>`${rel}: ${error}`));
+    if(ext==='.js') errors.push(...auditScript(text,security).map(error=>`${rel}: ${error}`));
     if(ext!=='.json' && forbidden.test(text)) errors.push(`${rel}: 禁用运行 CDN`);
     for(const match of text.matchAll(/https?:\/\/[^\s"'<>\\)]+/g)) external.add(match[0]);
     if(ext==='.html') {

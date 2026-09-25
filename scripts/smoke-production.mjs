@@ -1,5 +1,6 @@
 import {pathToFileURL} from 'node:url';
 import {registry} from './common.mjs';
+import {auditHtml,auditScript,auditStylesheet,expectedHeaders} from './runtime-security.mjs';
 
 export const productionOrigin='https://kplgame.cn';
 const criticalExtensions=/\.(?:js|css|json)$/i;
@@ -15,11 +16,11 @@ export function pageResources(html,pageURL) {
   return [...urls];
 }
 
-export async function smokeProduction({origin=productionOrigin,games,fetcher=fetch}={}) {
+export async function smokeProduction({origin=productionOrigin,games,fetcher=fetch,checkHeaders=origin===productionOrigin}={}) {
   const entries=games ?? (await registry()).filter(game=>game.enabled);
   const failures=[],warnings=[],checked=[];
-  const pages=['/',...entries.map(game=>game.path)];
-  for(const page of pages) {
+  const pages=[{path:'/',id:'portal'},...entries.map(game=>({path:game.path,id:game.id}))];
+  for(const {path:page,id:owner} of pages) {
     const pageURL=new URL(page,origin).href;
     let response;
     try { response=await fetcher(pageURL,{cache:'no-store',signal:AbortSignal.timeout(15_000)}); }
@@ -28,17 +29,26 @@ export async function smokeProduction({origin=productionOrigin,games,fetcher=fet
     const html=await response.text();
     checked.push(page);
     if(!/<html\b/i.test(html)) failures.push(`${page}: 响应不是 HTML`);
+    failures.push(...auditHtml(html,{pageURL,owner,origin}));
+    if(checkHeaders) for(const [key,value] of Object.entries(expectedHeaders)) {
+      if(key==='strict-transport-security' && origin!==productionOrigin) continue;
+      if(response.headers?.get(key)!==value) failures.push(`${page}: ${key} 响应头与基线不一致`);
+    }
     for(const resource of pageResources(html,pageURL)) {
       try {
         const asset=await fetcher(resource,{cache:'no-store',signal:AbortSignal.timeout(15_000)});
         if(asset.status!==200) failures.push(`${resource}: HTTP ${asset.status}`);
         else {
           checked.push(resource);
+          const pathname=new URL(resource).pathname;
+          if(pathname.endsWith('.css')) failures.push(...auditStylesheet(await asset.text(),{pageURL:resource,owner,origin}));
           // Check literal JSON loads in the page's first-party JS.
-          if(new URL(resource).pathname.endsWith('.js')) {
+          if(pathname.endsWith('.js')) {
             const js=await asset.text();
+            failures.push(...auditScript(js,{pageURL:resource,owner,origin}));
             for(const match of js.matchAll(/fetch\(\s*["'`]([^"'`]+\.json(?:\?[^"'`]*)?)["'`]/g)) {
               const jsonURL=new URL(match[1],pageURL);
+              failures.push(...auditScript(`fetch("${jsonURL.href}")`,{pageURL:resource,owner,origin}));
               if(jsonURL.origin!==new URL(origin).origin) continue;
               const data=await fetcher(jsonURL,{cache:'no-store',signal:AbortSignal.timeout(15_000)});
               if(data.status!==200) failures.push(`${jsonURL.href}: HTTP ${data.status}`);
