@@ -8,7 +8,7 @@
   },
   {
     "id": "guessing", "name": "KPL Guessing", "repo": "KQ-KUN/KPL-Guessing",
-    "ref": "3bd95fc67c928487d0abc934cf78a1bb94d542fd",
+    "ref": "5290fd22f06e24075d9ee59d7520e3ffcb90dd62",
     "path": "/guessing/", "category": "人物竞猜", "description": "弗一把 · KPL天才 · 人物图鉴",
     "accent": "blue", "icon": "shared/guessing-mark.svg", "enabled": true,
     "build": { "type": "npm", "output": "dist", "args": ["--base=./"], "test": ["npm", "test"] }
