@@ -1,19 +1,19 @@
 [
   {
     "id": "kpl2k", "name": "KPL 2K", "repo": "KQ-KUN/kpl2k",
-    "ref": "847786929500b31bf47e146d75a75a8f5b0f6b58",
+    "ref": "d2cf34b030fee6f0d42cb1863e0477525452657e",
     "path": "/kpl2k/", "category": "战队经营", "description": "平行时空战队经理",
     "accent": "red", "icon": "shared/kpl2k-mark.svg", "enabled": true,
     "build": { "type": "static", "output": "app", "test": ["node", "tools/verify_engine.js"] }
   },
   {
     "id": "guessing", "name": "KPL Guessing", "repo": "KQ-KUN/KPL-Guessing",
-    "ref": "256481cd1e580eb9999bef3194b6d0744105c316",
+    "ref": "7fca9abede0ac26c256b886764d213a3a736561d",
     "path": "/guessing/", "category": "人物竞猜", "description": "弗一把 · KPL天才 · 人物图鉴",
     "accent": "blue", "icon": "shared/guessing-mark.svg", "enabled": true,
     "build": { "type": "npm", "output": "dist", "args": ["--base=./"], "test": ["npm", "test"] }
   },
-  { "id": "link", "name": "KPL Link", "repo": "KQ-KUN/kpl-link", "ref": "46c79c7fa67dc9741e0b350c50dfc9c5845aadf9", "path": "/link/", "category": "关系解谜", "description": "最短队友链 · KPL关系挑战", "accent": "purple", "icon": "shared/link-mark.svg", "enabled": true, "build": { "type": "npm", "output": "dist", "test": ["npm", "test"] } },
+  { "id": "link", "name": "KPL Link", "repo": "KQ-KUN/kpl-link", "ref": "d68acbd797fb4177c1f481f2466c2951c1c7a242", "path": "/link/", "category": "关系解谜", "description": "最短队友链 · KPL关系挑战", "accent": "purple", "icon": "shared/link-mark.svg", "enabled": true, "build": { "type": "npm", "output": "dist", "test": ["npm", "test"] } },
   { "id": "timeline", "name": "KPL Timeline", "repo": "KQ-KUN/kpl-timeline", "path": "/timeline/", "category": "历史挑战", "description": "探索 KPL 赛事历史", "accent": "blue", "enabled": false },
   { "id": "grid", "name": "KPL Grid", "repo": "KQ-KUN/kpl-grid", "path": "/grid/", "category": "条件解谜", "description": "寻找符合条件的选手", "accent": "purple", "enabled": false },
   { "id": "draft", "name": "KPL Draft", "repo": "KQ-KUN/kpl-draft", "path": "/draft/", "category": "选秀", "description": "构建你的选秀阵容", "accent": "red", "enabled": false },

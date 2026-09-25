@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {root,dist,files,registry} from './common.mjs';
 import {auditHtml,auditScript,auditStylesheet,expectedHeaders} from './runtime-security.mjs';
+import {eventNames} from './analytics-events.mjs';
 
 export function resolveAsset(base, reference, output=dist) {
   if (!reference || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(reference)) return null;
@@ -16,6 +17,11 @@ export async function validate(output=dist) {
   const games=(await registry()).filter(g=>g.enabled);
   const all=await files(output);
   const errors=[], external=new Set();
+  for(const event of eventNames) {
+    const endpoint=path.join(output,'__event',`${event}.txt`);
+    if((await fs.readFile(endpoint,'utf8').catch(()=>null))!=='ok\n') errors.push(`缺少 analytics endpoint: ${event}`);
+  }
+  if(expectedHeaders['content-security-policy']?.split(';').map(part=>part.trim()).find(part=>part.startsWith('connect-src '))!=="connect-src 'self'") errors.push('analytics 必须保持 connect-src self');
   for(const key of ['content-security-policy','x-content-type-options','referrer-policy','permissions-policy','strict-transport-security']) {
     if(!expectedHeaders[key]) errors.push(`缺少安全响应头: ${key}`);
   }
