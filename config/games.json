@@ -1,7 +1,7 @@
 [
   {
     "id": "kpl2k", "name": "KPL 2K", "repo": "KQ-KUN/kpl2k",
-    "ref": "d2cf34b030fee6f0d42cb1863e0477525452657e",
+    "ref": "743cd38530313cc749eccacdbf0a5174e5b5fb69",
     "path": "/kpl2k/", "category": "战队经营", "description": "平行时空战队经理",
     "accent": "red", "icon": "shared/kpl2k-mark.svg", "enabled": true,
     "build": { "type": "static", "output": "app", "test": ["node", "tools/verify_engine.js"] }
