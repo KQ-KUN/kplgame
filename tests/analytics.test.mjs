@@ -89,3 +89,16 @@ test('production smoke never requests event paths and CSP stays same-origin',asy
   assert.equal(pageResources('<script src="/__event/pageview-link.txt"></script>','https://example.test/').length,0);
   assert.equal(expectedHeaders['content-security-policy'].split(';').map(part=>part.trim()).find(part=>part.startsWith('connect-src ')),"connect-src 'self'");
 });
+
+test('all Portal game rows preserve click event names without intercepting navigation',()=>{
+  for(const id of ['kpl2k','guessing','link']) {
+    const run=load();
+    const target=new run.context.Element();
+    target.closest=selector=>{
+      assert.equal(selector,'.game-card[data-game]');
+      return {getAttribute:()=>id};
+    };
+    run.listeners.get('click')({target});
+    assert.equal(run.calls.at(-1).url,`/__event/portal-click-${id}.txt`);
+  }
+});

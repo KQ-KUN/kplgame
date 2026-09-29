@@ -1,0 +1,33 @@
+{
+  "utilities": [
+    {
+      "id": "ad",
+      "label": "广告位招租",
+      "description": "欢迎合作",
+      "icon": "shared/utility-ad.svg",
+      "href": null,
+      "panelText": "欢迎合作 / 联系投放。添加 WX：hkq2297409816（备注来意）。"
+    },
+    {
+      "id": "bilibili",
+      "label": "B站账号",
+      "description": "几几华华里",
+      "icon": "shared/utility-bilibili.svg",
+      "href": "https://b23.tv/T3zXuwt"
+    },
+    {
+      "id": "updates",
+      "label": "更新公告",
+      "description": "查看最近更新",
+      "icon": "shared/utility-updates.svg",
+      "href": "/announcement.html"
+    },
+    {
+      "id": "bugreport",
+      "label": "Bug反馈",
+      "description": "帮助改进游戏",
+      "icon": "shared/utility-bugreport.svg",
+      "href": "https://m.bilibili.com/opus/1253349986197831686"
+    }
+  ]
+}

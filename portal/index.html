@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f3f6fc">
+  <meta name="theme-color" content="#F6F2E9">
   <meta name="description" content="{{description}}">
   <title>{{name}} · 非官方粉丝自制小游戏</title>
   <link rel="icon" href="/shared/kpl2k-mark.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/portal.css">
 </head>
 <body>
   <main class="hub">
-    <header class="hero"><p class="brand-name">{{name}}</p><h1>{{title}}</h1><p>{{description}}</p></header>
+    <header class="hero"><h1 lang="en">{{name}}</h1><p class="brand-name">{{title}}</p></header>
     <section class="game-grid" aria-label="游戏入口">{{games}}</section>
-    <a class="announcement-link" href="/announcement.html"><span class="announcement-mark" aria-hidden="true">i</span><span class="announcement-copy"><strong>查看更新公告</strong></span><span class="announcement-arrow" aria-hidden="true">→</span></a>
+    <nav class="utility-grid" aria-label="辅助信息">{{utilities}}</nav>
     <footer class="site-footer">{{disclaimer}}<p>本站使用匿名访问统计了解页面与游戏使用情况，不设置统计 Cookie，不记录用户输入内容。</p></footer>
+    {{panels}}
+    <noscript><p class="no-script">广告合作说明需要启用 JavaScript；游戏、B站、更新公告与 Bug 反馈可直接访问。</p></noscript>
   </main>
   <script src="/shared/analytics.js" defer></script>
+  <script src="/portal.js" defer></script>
 </body>
 </html>

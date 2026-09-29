@@ -2,9 +2,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {root,dist,registry,sourceFor,readJSON,escapeHTML as e,run,inside} from './common.mjs';
 import {writeEventFiles} from './analytics-events.mjs';
+import {renderGames,renderUtilities} from './portal-view.mjs';
 
 const games=(await registry()).filter(g=>g.enabled);
 const site=await readJSON(path.join(root,'config/site.json'));
+const utilityView=renderUtilities(await readJSON(path.join(root,'config/portal.json')));
 const ads=await readJSON(path.join(root,'config/ads.json'));
 if(ads.enabled!==false) throw new Error('当前仅支持关闭广告，启用需独立实现与审核');
 const sources=await Promise.all(games.map(async g=>({g,source:await sourceFor(g)})));
@@ -14,10 +16,11 @@ if(dist!==path.join(root,'dist')) throw new Error('输出保护失败');
 await fs.rm(dist,{recursive:true,force:true});
 await fs.cp(path.join(root,'portal'),dist,{recursive:true});
 await fs.cp(path.join(root,'public'),dist,{recursive:true});
-const cards=games.map(g=>`<a class="game-card game-card--${g.accent}" data-game="${e(g.id)}" href="${e(g.path)}"><span class="card-glow" aria-hidden="true"></span><span class="avatar-wrap"><img src="/${e(g.icon)}" alt="" width="82" height="82"></span><span class="card-copy"><span class="game-type">${e(g.category)}</span><strong>${e(g.name)}</strong><span class="game-desc">${e(g.description)}</span></span><span class="enter">进入游戏 <b aria-hidden="true">→</b></span></a>`).join('\n');
+const cards=renderGames(games);
 let html=await fs.readFile(path.join(dist,'index.html'),'utf8');
 for(const [key,value] of Object.entries({name:site.name,title:site.title,description:site.description,disclaimer:site.disclaimer})) html=html.replaceAll(`{{${key}}}`,e(value));
 html=html.replace('{{games}}',cards);
+html=html.replace('{{utilities}}',utilityView.utilities).replace('{{panels}}',utilityView.panels);
 await fs.writeFile(path.join(dist,'index.html'),html);
 const manifest=[];
 for(const {g,source} of sources) {
