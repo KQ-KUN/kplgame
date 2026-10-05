@@ -6,7 +6,10 @@ import {renderGames,renderUtilities} from './portal-view.mjs';
 
 const games=(await registry()).filter(g=>g.enabled);
 const site=await readJSON(path.join(root,'config/site.json'));
-const utilityView=renderUtilities(await readJSON(path.join(root,'config/portal.json')));
+const portalConfig=await readJSON(path.join(root,'config/portal.json'));
+const utilityView=renderUtilities(portalConfig);
+const cooperationText=portalConfig.utilities.find(item=>item.id==='ad')?.panelText;
+if(typeof cooperationText!=='string' || !cooperationText.trim()) throw new Error('广告合作缺少联系方式');
 const ads=await readJSON(path.join(root,'config/ads.json'));
 if(ads.enabled!==false) throw new Error('当前仅支持关闭广告，启用需独立实现与审核');
 const sources=await Promise.all(games.map(async g=>({g,source:await sourceFor(g)})));
@@ -22,6 +25,8 @@ for(const [key,value] of Object.entries({name:site.name,title:site.title,descrip
 html=html.replace('{{games}}',cards);
 html=html.replace('{{utilities}}',utilityView.utilities).replace('{{panels}}',utilityView.panels);
 await fs.writeFile(path.join(dist,'index.html'),html);
+const cooperationTemplate=await fs.readFile(path.join(root,'portal/cooperation.html'),'utf8');
+await fs.writeFile(path.join(dist,'cooperation.html'),cooperationTemplate.replace('{{cooperationText}}',e(cooperationText)));
 const manifest=[];
 for(const {g,source} of sources) {
   const dest=inside(dist,g.path.slice(1));

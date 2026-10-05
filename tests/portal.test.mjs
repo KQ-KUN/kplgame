@@ -19,11 +19,12 @@ test('unconfigured utilities show named panels; configured external URLs open sa
   const config=JSON.parse(await fs.readFile(new URL('../config/portal.json',import.meta.url),'utf8'));
   const view=renderUtilities(config);
   assert.equal((view.utilities.match(/class="utility-card"/g)||[]).length,4);
-  assert.equal((view.panels.match(/<section /g)||[]).length,1);
-  assert.match(view.panels, /aria-labelledby="ad-title" hidden/);
-  assert.match(view.utilities, /aria-expanded="false" aria-controls="ad-panel"/);
-  assert.ok(!view.panels.includes('<dialog') && !view.panels.includes('<form'));
-  assert.match(view.panels,/添加 WX：hkq2297409816（备注来意）/);
+  assert.equal(view.panels,'');
+  assert.match(view.utilities, /href="\/cooperation.html"/);
+  assert.ok(!view.utilities.includes('data-panel') && !view.utilities.includes('ad-panel'));
+  const placeholder=renderUtilities({utilities:[{id:'demo',label:'说明',description:'信息',href:null,panelText:'内容'}]});
+  assert.match(placeholder.panels, /aria-labelledby="demo-title" hidden/);
+  assert.match(placeholder.utilities, /aria-expanded="false" aria-controls="demo-panel"/);
   assert.match(view.utilities,/href="https:\/\/b23.tv\/T3zXuwt" target="_blank" rel="noopener noreferrer"/);
   assert.match(view.utilities,/href="https:\/\/m.bilibili.com\/opus\/1253349986197831686" target="_blank" rel="noopener noreferrer"/);
   assert.match(view.utilities,/几几华华里/);
@@ -42,6 +43,17 @@ test('unconfigured utilities show named panels; configured external URLs open sa
   assert.equal(external.panels,'');
   const uppercase=renderUtilities({utilities:[{id:'external',label:'入口',description:'说明',href:'HTTPS://example.test/'}]});
   assert.match(uppercase.utilities,/target="_blank"/);
+});
+
+test('cooperation page shows contact information without scripts, dialogs or advertising ids',async()=>{
+  const template=await fs.readFile(new URL('../portal/cooperation.html',import.meta.url),'utf8');
+  const config=JSON.parse(await fs.readFile(new URL('../config/portal.json',import.meta.url),'utf8'));
+  const contact=config.utilities.find(item=>item.id==='ad');
+  assert.equal(contact.href,'/cooperation.html');
+  assert.match(contact.panelText,/添加 WX：hkq2297409816（备注来意）/);
+  assert.match(template,/\{\{cooperationText\}\}/);
+  assert.match(template,/href="\/">← 返回游戏中心/);
+  assert.ok(!/<script\b|<dialog\b|\bhidden\b|\bid="ad[-"]/i.test(template));
 });
 
 test('utility config rejects executable URLs, protocol-relative URLs and duplicate ids',()=>{

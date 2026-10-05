@@ -84,6 +84,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .utility-panel p { margin: 16px 0 24px; font-size: 16px; line-height: 1.7; overflow-wrap: anywhere; }
 .panel-actions { display: flex; justify-content: flex-end; }
 .close-panel { min-height: 44px; padding: 8px 24px; border: 1px solid var(--color-control-border); border-radius: 4px; background: var(--color-surface); color: var(--color-text); font-weight: 600; }
+.contact-back { display: inline-flex; align-items: center; text-decoration: none; }
 .no-script { font-size: 14px; line-height: 1.6; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
