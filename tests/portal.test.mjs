@@ -19,7 +19,10 @@ test('unconfigured utilities show named panels; configured external URLs open sa
   const config=JSON.parse(await fs.readFile(new URL('../config/portal.json',import.meta.url),'utf8'));
   const view=renderUtilities(config);
   assert.equal((view.utilities.match(/class="utility-card"/g)||[]).length,4);
-  assert.equal((view.panels.match(/<dialog /g)||[]).length,1);
+  assert.equal((view.panels.match(/<section /g)||[]).length,1);
+  assert.match(view.panels, /aria-labelledby="ad-title" hidden/);
+  assert.match(view.utilities, /aria-expanded="false" aria-controls="ad-panel"/);
+  assert.ok(!view.panels.includes('<dialog') && !view.panels.includes('<form'));
   assert.match(view.panels,/添加 WX：hkq2297409816（备注来意）/);
   assert.match(view.utilities,/href="https:\/\/b23.tv\/T3zXuwt" target="_blank" rel="noopener noreferrer"/);
   assert.match(view.utilities,/href="https:\/\/m.bilibili.com\/opus\/1253349986197831686" target="_blank" rel="noopener noreferrer"/);

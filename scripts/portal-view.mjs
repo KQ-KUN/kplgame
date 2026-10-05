@@ -26,8 +26,8 @@ export function renderUtilities({utilities}) {
       return `<a class="utility-card" href="${e(item.href)}"${external?' target="_blank" rel="noopener noreferrer"':''}>${content}${external?'<span class="sr-only">（在新标签页打开）</span>':''}</a>`;
     }
     if(typeof item.panelText!=='string' || !item.panelText.trim()) throw new Error('占位入口缺少说明');
-    panels.push(`<dialog class="utility-panel" id="${e(item.id)}-panel" aria-labelledby="${e(item.id)}-title"><h2 id="${e(item.id)}-title">${e(item.label)}</h2><p>${e(item.panelText)}</p><form method="dialog"><button class="close-panel" autofocus>关闭</button></form></dialog>`);
-    return `<button type="button" class="utility-card" data-panel="${e(item.id)}-panel" aria-haspopup="dialog" aria-controls="${e(item.id)}-panel">${content}</button>`;
+    panels.push(`<section class="utility-panel" id="${e(item.id)}-panel" aria-labelledby="${e(item.id)}-title" hidden><h2 id="${e(item.id)}-title">${e(item.label)}</h2><p>${e(item.panelText)}</p><div class="panel-actions"><button type="button" class="close-panel">关闭</button></div></section>`);
+    return `<button type="button" class="utility-card" data-panel="${e(item.id)}-panel" aria-expanded="false" aria-controls="${e(item.id)}-panel">${content}</button>`;
   });
   return {utilities:links.join('\n'),panels:panels.join('\n')};
 }
