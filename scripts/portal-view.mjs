@@ -1,7 +1,7 @@
 import {escapeHTML as e} from './common.mjs';
 
 export function renderGames(games) {
-  return games.filter(g=>g.enabled).map((g,index)=>`<a class="game-card game-card--${e(g.accent)}" data-game="${e(g.id)}" href="${e(g.path)}"><span class="game-number" aria-hidden="true">${String(index+1).padStart(2,'0')}</span><span class="avatar-wrap"><img src="/${e(g.icon)}" alt="" width="48" height="48"></span><span class="card-copy"><strong lang="en">${e(g.name.replace(/^KPL\s+/,''))}</strong><span class="game-type">${e(g.category)}</span></span><span class="enter"><span class="enter-label">进入游戏</span><span aria-hidden="true">→</span></span></a>`).join('\n');
+  return games.filter(g=>g.enabled).map((g,index)=>`<a class="game-card game-card--${e(g.accent)}" data-game="${e(g.id)}" href="${e(g.path)}"><span class="game-number" aria-hidden="true">${String(index+1).padStart(2,'0')}</span><span class="avatar-wrap"><img src="/${e(g.icon)}" alt="" width="48" height="48"></span><span class="card-copy"><strong${/[\u3400-\u9fff]/.test(g.name)?'':' lang="en"'}>${e(g.name.replace(/^KPL\s+/,''))}</strong><span class="game-type">${e(g.category)}</span></span><span class="enter"><span class="enter-label">进入</span><span aria-hidden="true">→</span></span></a>`).join('\n');
 }
 
 export function renderUtilities({utilities}) {

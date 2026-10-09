@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#A52B3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <title>战队合成：小球合成大球</title>
+  <circle cx="17" cy="13" r="7"/>
+  <circle cx="47" cy="13" r="7"/>
+  <path d="m22 23 5 5m15-5-5 5"/>
+  <circle cx="32" cy="44" r="14"/>
+  <path d="M27 44h10m-5-5v10"/>
+</svg>
