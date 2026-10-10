@@ -50,7 +50,7 @@ test('cooperation page shows contact information without scripts, dialogs or adv
   const config=JSON.parse(await fs.readFile(new URL('../config/portal.json',import.meta.url),'utf8'));
   const contact=config.utilities.find(item=>item.id==='ad');
   assert.equal(contact.href,'/cooperation.html');
-  assert.match(contact.panelText,/添加 WX：hkq2297409816（备注来意）/);
+  assert.match(contact.panelText,/添加 WX：a1828578239（备注来意）/);
   assert.match(template,/\{\{cooperationText\}\}/);
   assert.match(template,/href="\/">← 返回游戏中心/);
   assert.ok(!/<script\b|<dialog\b|\bhidden\b|\bid="ad[-"]/i.test(template));
