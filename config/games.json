@@ -14,7 +14,7 @@
     "build": { "type": "npm", "output": "dist", "args": ["--base=./"], "test": ["npm", "test"] }
   },
   { "id": "link", "name": "KPL Link", "repo": "KQ-KUN/kpl-link", "ref": "70bab3c7fe331f078b5bfb744c5e3daac851a9e3", "path": "/link/", "category": "关系解谜", "description": "最短队友链 · KPL关系挑战", "accent": "purple", "icon": "shared/link-mark.svg", "enabled": true, "build": { "type": "npm", "output": "dist", "test": ["npm", "test"] } },
-  { "id": "merge", "name": "合成KPL", "repo": "KQ-KUN/kpl-merge", "ref": "458836d8548485e4f1c82ab720c5f8c1ffb0e625", "path": "/merge/", "category": "战队合成", "description": "合成你的本命战队", "accent": "red", "icon": "shared/merge-mark.svg", "enabled": true, "build": { "type": "npm", "output": "dist", "test": ["npm", "test"] } },
+  { "id": "merge", "name": "合成KPL", "repo": "KQ-KUN/kpl-merge", "ref": "4f9dd3933bd84c3e54cf16ad5b5796fa11e1b080", "path": "/merge/", "category": "战队合成", "description": "合成你的本命战队", "accent": "red", "icon": "shared/merge-mark.svg", "enabled": true, "build": { "type": "npm", "output": "dist", "test": ["npm", "test"] } },
   { "id": "timeline", "name": "KPL Timeline", "repo": "KQ-KUN/kpl-timeline", "path": "/timeline/", "category": "历史挑战", "description": "探索 KPL 赛事历史", "accent": "blue", "enabled": false },
   { "id": "grid", "name": "KPL Grid", "repo": "KQ-KUN/kpl-grid", "path": "/grid/", "category": "条件解谜", "description": "寻找符合条件的选手", "accent": "purple", "enabled": false },
   { "id": "draft", "name": "KPL Draft", "repo": "KQ-KUN/kpl-draft", "path": "/draft/", "category": "选秀", "description": "构建你的选秀阵容", "accent": "red", "enabled": false },
