@@ -42,7 +42,7 @@ test('build writes every fixed endpoint with only ok content',async()=>{
 });
 
 test('pageview is once per document and webdriver sends nothing',()=>{
-  for(const [path,name] of [['/','portal'],['/kpl2k/','kpl2k'],['/guessing/','guessing'],['/link/','link']]) {
+  for(const [path,name] of [['/','portal'],['/kpl2k/','kpl2k'],['/guessing/','guessing'],['/link/','link'],['/merge/','merge']]) {
     const page=load(path);
     assert.deepEqual(page.calls.map(call=>call.url),[`/__event/pageview-${name}.txt`]);
     assert.equal(page.window.KPLAnalytics.trackPageView(name),false);
@@ -91,7 +91,7 @@ test('production smoke never requests event paths and CSP stays same-origin',asy
 });
 
 test('all Portal game rows preserve click event names without intercepting navigation',()=>{
-  for(const id of ['kpl2k','guessing','link']) {
+  for(const id of ['kpl2k','guessing','link','merge']) {
     const run=load();
     const target=new run.context.Element();
     target.closest=selector=>{
@@ -101,4 +101,13 @@ test('all Portal game rows preserve click event names without intercepting navig
     run.listeners.get('click')({target});
     assert.equal(run.calls.at(-1).url,`/__event/portal-click-${id}.txt`);
   }
+});
+
+test('merge landing tracks source and bot mode suppresses all merge events',()=>{
+  const run=load('/merge/','?utm_source=bilibili');
+  assert.deepEqual(run.calls.map(c=>c.url),['/__event/pageview-merge.txt','/__event/source-bilibili.txt']);
+  assert.equal(run.window.KPLAnalytics.trackPageView('merge'),false);
+  const bot=load('/merge/','?utm_source=bilibili',{webdriver:true});
+  for(const name of ['merge-start','merge-favorite','merge-restart','merge-gameover']) bot.window.KPLAnalytics.trackEvent(name);
+  assert.equal(bot.calls.length,0);
 });
