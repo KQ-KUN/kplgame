@@ -4,6 +4,8 @@
 
 先读 [总交接](docs/KPL_GAME_HANDOFF.md)。开发接入见 [GAME_INTEGRATION](docs/GAME_INTEGRATION.md)，部署见 [DEPLOYMENT](docs/DEPLOYMENT.md)，当前实际状态见 [ACCEPTANCE](docs/ACCEPTANCE.md)。
 
+游戏更新、首发、发布失败恢复与回滚统一遵守 [发布执行规范](docs/RELEASE_PROTOCOL.md)；现行发布命令与自动化实现边界见 [CODEX_RELEASE](docs/CODEX_RELEASE.md)。
+
 需要 Node.js 24、npm、Git：
 
 ```sh
