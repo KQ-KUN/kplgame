@@ -6,14 +6,16 @@ import {waitForProduction,shaPattern} from './wait-production.mjs';
 import {smokeProduction} from './smoke-production.mjs';
 import {checkGitAuth} from './check-git-auth.mjs';
 import {gitNetwork} from './git-network.mjs';
+import {completeRelease,releaseJournal} from './release-state.mjs';
+import {smokeBrowser} from './smoke-browser.mjs';
 
 const args=process.argv.slice(2);
 const gameId=args.find(arg=>!arg.startsWith('--'));
 const dryRun=args.includes('--dry-run');
 const releaseFiles=args.filter(arg=>arg.startsWith('--file=')).map(arg=>arg.slice(7));
-const report={gameId,dryRun,steps:[],status:'started'};
-const reportPath=path.join(root,'reports/release-latest.json');
-const record=(step,detail)=>{report.steps.push({step,detail});console.log(`[release] ${step}: ${detail}`);};
+const journal=releaseJournal(path.join(root,'reports'),{gameId,dryRun});
+const {report,stage}=journal;
+const record=(step,detail)=>{journal.record(step,detail);console.log(`[release] ${step}: ${detail}`);};
 const git=(cwd,...args)=>run('git',args,cwd,true);
 const gitRemote=(cwd,repo)=>{
   const fetch=git(cwd,'remote','get-url','origin');
@@ -98,8 +100,10 @@ async function main() {
   if(changed.some(file=>!allowed.has(file.replaceAll('\\','/'))) || releaseFiles.some(file=>!changed.some(item=>samePath(item,file)))) throw new Error(`游戏改动与 --file 清单不一致: ${changed.join(', ') || '无改动'}`);
   if(new Set(releaseFiles).size!==releaseFiles.length) throw new Error('--file 不得重复');
   record('source',source);
+  report.localVersion={sha:git(source,'rev-parse','HEAD'),dirty:changed.length>0};
   let sourceAuth;
   for(const [name,dir,repo] of [['game',source,game.repo],['platform',root,'KQ-KUN/kplgame']]) {
+    stage(`${name}-auth`);
     const result=await checkGitAuth(dir,repo);
     record(`${name}-auth`,result.status);
     if(result.status==='CREDENTIAL_CONTEXT_MISMATCH') throw new Error(`${result.status}: 当前执行上下文无法访问已有 Git 凭据；Codex 应自动在正常登录用户上下文重新运行发布命令，不需重新登录`);
@@ -108,17 +112,20 @@ async function main() {
   }
   const previousRemote=sourceAuth.remoteSha;
   record('game-remote-before',previousRemote);
+  stage('game-test');
   run(game.build.test[0],game.build.test.slice(1),source);
   record('game-test','passed');
   const packageFile=path.join(source,'package.json');
   const packageInfo=await readJSON(packageFile).catch(error=>{if(error.code==='ENOENT')return null;throw error;});
-  if(packageInfo?.scripts?.typecheck) {run('npm',['run','typecheck'],source);record('game-typecheck','passed');}
+  if(packageInfo?.scripts?.typecheck) {stage('game-typecheck');run('npm',['run','typecheck'],source);record('game-typecheck','passed');}
+  stage('game-build');
   if(game.build.type==='npm') run('npm',['run','build',...(game.build.args?.length?['--',...game.build.args]:[])],source);
   else await fs.access(path.join(source,game.build.output,'index.html'));
   record('game-build','passed');
   let newRef=previousRemote;
   if(!dryRun) {
     if(releaseFiles.length) {
+      stage('game-commit');
       run('git',['add','--',...releaseFiles],source);
       const staged=rawGit(source,['diff','--cached','--name-only','-z']).split('\0').filter(Boolean);
       if(staged.some(file=>!allowed.has(file.replaceAll('\\','/')))) throw new Error('暂存区含非本次任务文件');
@@ -126,25 +133,33 @@ async function main() {
     }
     const localHead=git(source,'rev-parse','HEAD');
     if(!shaPattern.test(localHead)) throw new Error('游戏 HEAD 无效');
-    await gitNetwork(source,['push','origin','main'],{remoteURL:git(source,'remote','get-url','--push','origin'),timeoutMs:180_000});
+    report.targetGameSha=localHead;
+    stage('game-push');
+    if(previousRemote!==localHead) await gitNetwork(source,['push','origin','main'],{remoteURL:git(source,'remote','get-url','--push','origin'),timeoutMs:180_000});
     newRef=await remoteMain(source);
     if(newRef!==localHead) throw new Error('游戏远端 main 与刚推送的 HEAD 不一致');
     record('game-push',newRef);
   }
+  report.aggregateVersion={gameSha:newRef,source:'locked-remote-ref',includesLocalChanges:!dryRun};
+  record('versions',JSON.stringify({local:report.localVersion,aggregate:report.aggregateVersion}));
   const registryFile=path.join(root,'config/games.json');
   const original=await fs.readFile(registryFile,'utf8');
   const updated=replaceRef(original,game,newRef);
   if(updated!==original) await fs.writeFile(registryFile,updated);
   let registryCommitted=false;
   try {
+    stage('platform-source-checkout');
     process.env.KPL_IGNORE_LOCAL_SOURCES='1';
     await resetGeneratedSources(games.filter(entry=>entry.enabled));
     for(const script of ['checkout','install:games','test','build','validate']) {
+      stage(`platform-${script}`);
       run('npm',['run',script],root);
       record(`platform-${script}`,'passed');
     }
-    if(dryRun) {report.status='dry-run-passed';return;}
-    if(updated===original) {record('platform-release','注册表 ref 未变化，无需发布');report.status='already-current';return;}
+    if(dryRun) {
+      report.status=await completeRelease({dryRun:true,record});return;
+    }
+    stage('platform-commit');
     const modified=dirtyFiles(root);
     if(modified.some(file=>file!=='config/games.json')) throw new Error(`平台出现意外变更: ${modified.join(', ')}`);
     if(modified.length) {
@@ -153,20 +168,18 @@ async function main() {
       registryCommitted=true;
     }
     const platformHead=git(root,'rev-parse','HEAD');
-    await gitNetwork(root,['push','origin','main'],{remoteURL:git(root,'remote','get-url','--push','origin'),timeoutMs:180_000});
-    const platformRemote=await remoteMain(root);
-    if(platformRemote!==platformHead) throw new Error('平台远端 main 与刚推送的 HEAD 不一致');
-    record('platform-push',platformRemote);
-    await waitForProduction(platformRemote);
-    record('production-version','matched');
-    await smokeProduction({games:games.filter(entry=>entry.enabled)});
-    record('production-smoke','passed');
-    report.status='published';
+    report.targetPlatformSha=platformHead;journal.save();
+    report.status=await completeRelease({dryRun:false,targetPlatformSha:platformHead,registryChanged:updated!==original,
+      getRemoteSha:()=>remoteMain(root),
+      push:()=>gitNetwork(root,['push','origin','main'],{remoteURL:git(root,'remote','get-url','--push','origin'),timeoutMs:180_000}),
+      wait:waitForProduction,smoke:()=>smokeProduction({games:games.filter(entry=>entry.enabled)}),
+      browser:()=>smokeBrowser({games:games.filter(entry=>entry.enabled)}),stage,record});
+    report.activeStage='complete';report.recovery={resumable:false};
   } finally {
     if(!registryCommitted && updated!==original) await fs.writeFile(registryFile,original);
   }
 }
 
 try {await main();}
-catch(error) {report.status='failed';report.error=error.message;console.error(`[release] ${error.message}`);process.exitCode=1;}
-finally {await fs.mkdir(path.dirname(reportPath),{recursive:true});await fs.writeFile(reportPath,JSON.stringify(report,null,2)+'\n');}
+catch(error) {journal.fail(error);console.error(`[release] ${error.message}`);process.exitCode=1;}
+finally {journal.save();}

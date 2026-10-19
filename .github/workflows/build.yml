@@ -39,3 +39,6 @@ jobs:
           node-version: '24'
       - run: node scripts/wait-production.mjs ${{ github.sha }}
       - run: node scripts/smoke-production.mjs
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/smoke-browser.mjs

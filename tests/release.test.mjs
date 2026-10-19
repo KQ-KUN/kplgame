@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {waitForProduction} from '../scripts/wait-production.mjs';
 import {pageResources,smokeProduction} from '../scripts/smoke-production.mjs';
 import {auditHtml,auditScript,auditStylesheet} from '../scripts/runtime-security.mjs';
+import {mockSite} from './fixtures/smoke-site.mjs';
 
 const sha='a'.repeat(40);
 test('production wait accepts only the requested commit and times out on stale deploy',async()=>{
@@ -30,19 +31,12 @@ test('production smoke fails when a page adds an unknown third-party script',asy
 });
 
 test('production smoke checks every entry and critical assets; favicon is warning',async()=>{
-  const html='<html><link rel="stylesheet" href="./style.css"><script src="./app.js"></script><link rel="icon" href="./favicon.ico"></html>';
-  const seen=[];
-  const fetcher=async url=>{
-    const pathname=new URL(url).pathname;
-    seen.push(pathname);
-    if(pathname.endsWith('favicon.ico')) return {status:404};
-    if(pathname.endsWith('app.js')) return {status:200,text:async()=>"fetch('./data.json')"};
-    return {status:200,text:async()=>html};
-  };
-  const result=await smokeProduction({origin:'https://example.test',games:[{path:'/link/'}],fetcher});
+  const {seen,fetcher}=mockSite();
+  const result=await smokeProduction({origin:'https://example.test',games:[{id:'link',path:'/link/'}],fetcher});
   assert.equal(result.ok,true);
-  assert.equal(result.warnings.length,2);
-  assert.ok(seen.includes('/link/data.json'));
+  assert.equal(result.warnings.length,1);
+  assert.ok(seen.includes('/link/data/players.json'));
+  assert.ok(seen.includes('/link/assets/chunk.js'));
   assert.deepEqual(pageResources('<link href="/x.css"><script src="https://other.test/x.js"></script>','https://example.test/link/'),['https://example.test/x.css']);
-  await assert.rejects(smokeProduction({origin:'https://example.test',games:[{path:'/link/'}],fetcher:async url=>({status:new URL(url).pathname==='/link/'?404:200,text:async()=>html})}),/smoke 失败/);
+  await assert.rejects(smokeProduction({origin:'https://example.test',games:[{id:'link',path:'/link/'}],fetcher:mockSite({'/link/':undefined}).fetcher}),/smoke 失败/);
 });

@@ -83,7 +83,7 @@ test('production smoke never requests event paths and CSP stays same-origin',asy
   const seen=[];
   await smokeProduction({origin:'https://example.test',games:[],fetcher:async url=>{
     seen.push(new URL(url).pathname);
-    return {status:200,text:async()=>'<html><script src="/shared/analytics.js"></script></html>'};
+    return {status:200,text:async()=>new URL(url).pathname==='/'?'<html><main class="hub"><section class="game-grid"></section></main><script src="/portal.js"></script><script src="/shared/analytics.js"></script></html>':'(()=>{})();'};
   }});
   assert.ok(seen.every(path=>!path.startsWith('/__event/')));
   assert.equal(pageResources('<script src="/__event/pageview-link.txt"></script>','https://example.test/').length,0);
