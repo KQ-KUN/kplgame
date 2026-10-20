@@ -64,7 +64,7 @@ npm run release:game -- <game-id>
 
 ## 6. 恢复与重复执行
 
-当前 `release-game.mjs` 在注册表 ref 未变化时可能返回 `already-current`。这不是正式站已更新的证明。
+当前 `release-game.mjs` 已将提交/推送与生产验收拆开：ref不变仍核对明确目标平台SHA、等待生产并执行HTTP与浏览器smoke，完成才返回 `already-current-verified`。状态文本本身仍不能代替目标SHA、refs和smoke证据。
 
 重复执行之前先读取之前的发布记录，核对远端平台 SHA、游戏 refs 和正式域名：
 

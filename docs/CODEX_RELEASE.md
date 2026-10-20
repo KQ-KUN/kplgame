@@ -6,7 +6,7 @@
 
 已有游戏更新：在游戏仓库完成本次改动，核对工作区只含本次文件。进入 `kplgame` 后运行 `npm run release:game -- <game-id> --dry-run`，确认通过，再运行 `npm run release:game -- <game-id>`。有未提交的本次文件时，两个命令都逐个附加 `--file=游戏仓库相对路径`；脚本只暂存列明的文件，任何未列明改动都会中止。游戏已提前提交时不用 `--file`，脚本不会制造空提交。
 
-脚本执行游戏 test、可用时的 typecheck、build，推送游戏 `main` 并查询远端 SHA；只更新该游戏的注册表 ref，再重新 checkout 公开仓库进行安装、测试、构建、校验。平台推送后等待 `https://kplgame.cn/release-meta.json` 的 `platformCommit` 等于刚推送的 SHA，再对首页、所有启用游戏入口及页面引用的本站 JS/CSS/JSON 做 HTTP 验收。结果写入本地忽略文件 `reports/release-latest.json`。`dist/release-meta.json` 每次构建自动生成，包含当前平台 HEAD 和所有启用游戏 ref；构建时间不参与版本判定。
+脚本执行游戏 test、可用时的 typecheck、build，推送游戏 `main` 并查询远端 SHA；只更新该游戏的注册表 ref，再重新 checkout 公开仓库进行安装、测试、构建、校验。平台推送后等待 `https://kplgame.cn/release-meta.json` 的 `platformCommit` 等于刚推送的 SHA，再对首页、所有启用游戏入口及页面引用的本站 JS/CSS/JSON 做 HTTP 验收，再执行禁止真实统计的浏览器关键操作。每次尝试写入唯一的本地忽略文件 `reports/release-<time>-<id>.json`；`reports/release-latest.json` 仅作最新索引，失败阶段、目标SHA及可恢复状态保留。`dist/release-meta.json` 每次构建自动生成，包含当前平台 HEAD 和所有启用游戏 ref；构建时间不参与版本判定。
 
 正式发布要求存在可用、非交互、安全的 Git push 凭据，HTTPS 和 SSH 均可。脚本开头会对游戏与平台分别执行远端查询和 `git push --dry-run`，并禁用 Git、Git Credential Manager 与 SSH 的交互提示。现有 HTTPS 安全凭据可直接复用，不需要配置 SSH、Windows ssh-agent 或重新登录 GitHub。平台 CI 与 EdgeOne 的公开源码 checkout 始终走 HTTPS。`--dry-run` 会执行认证预检，但不提交、不真正推送、不等待生产；它使用游戏远端 `main` 的现有 SHA 做聚合验证。因此尚未推送的游戏改动，dry-run 的聚合阶段验证的是当前远端版；游戏本地 test/build 已验证本次改动。
 
@@ -26,6 +26,10 @@ Git 网络请求设有有限超时；checkout 的每次 `git fetch` 最多等待
 
 ## 失败边界
 
-注册表 ref 未变化时，现行脚本可能直接返回 `already-current`，早于生产等待；这不是上线成功。应先核对远端目标和正式域名，再按 [恢复与重复执行](RELEASE_PROTOCOL.md#6-恢复与重复执行) 补跑未完成检查。已有 GitHub 构建成功但没有对应云任务时，按规范进行分类和最多一次受控 Git 重试；状态不可读不能推断为任务缺失，明确构建失败不得空提交掩盖。
+注册表 ref 未变化时，现行脚本仍以明确的本地平台 HEAD 核对远端，必要时补推，随后等待同一目标生产 SHA 并执行 HTTP 与浏览器 smoke；全部通过才返回 `already-current-verified`。提交/推送是否需要与线上验收是否需要相互独立。恢复按 [恢复与重复执行](RELEASE_PROTOCOL.md#6-恢复与重复执行) 核对唯一尝试记录，不从头重复已完成写入。已有 GitHub 构建成功但没有对应云任务时，按规范进行分类和最多一次受控 Git 重试；状态不可读不能推断为任务缺失，明确构建失败不得空提交掩盖。
 
 任一认证预检、游戏测试、远端查询、聚合验证失败，脚本立即停止，不推送平台。`CREDENTIAL_CONTEXT_MISMATCH` 表示当前上下文无法访问现有凭据，Codex 应自动切正常用户重试，不向用户报“凭据失效”；`AUTH_REQUIRED` 只在正常用户 push 预检明确认证失败后表示需要重新认证；`REMOTE_UNREACHABLE` 会先自动重试，不误报为登录失效；`NO_PUSH_PERMISSION` 表示当前身份无写入权限。游戏 push 成功但平台失败时，游戏远端可能已经更新，平台仍保持旧 ref；报告中保留已完成阶段供修复后重试。平台 push 后若生产版本等待或 smoke 失败，状态为失败/待调查，不手动触发 EdgeOne 部署掩盖问题。GitHub Actions 对 `main` 的绿色结果同时要求构建通过、对应 SHA 已部署以及生产 smoke 通过；PR 只进行构建验证。
+
+## 多游戏协调发布
+
+五游戏及平台配套变更应先核对各独立候选、认证、dry-run和回滚 refs，再推送并逐一确认游戏完整SHA。平台本地一次准备已推送的目标refs，最后仍由release:game完成最终目标游戏ref、公开来源聚合、平台推送和线上验收。旧dry-run的生成sources若不匹配新目标，先核对为本次创建的独立生成目录并归档，不能删除未知工作树或把本地候选称作公开锁定版本。
