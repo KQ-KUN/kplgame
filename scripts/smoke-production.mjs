@@ -87,6 +87,14 @@ export async function smokeProduction({origin=productionOrigin,games,fetcher=fet
       try {data.set(reference,await resource(reference,owner,pageURL,validator));}
       catch(error) {failures.push(error.message);}
     }
+    if(owner==='link' && data.get('data/link_graph.json')?.latestYear) {
+      const version=data.get('data/link_graph.json').dataVersion;
+      if(data.get('data/players.json')?.dataVersion!==version)failures.push('link: players/runtime dataVersion mismatch');
+      try {
+        await resource('data/link_evidence.json',owner,pageURL,d=>d.schemaVersion===1&&d.dataVersion===version&&d.evidence&&typeof d.evidence==='object'&&!Array.isArray(d.evidence));
+        await resource('data/manifest.json',owner,pageURL,d=>d.schemaVersion===1&&d.dataVersion===version&&/^[a-f0-9]{40}$/.test(d.sourceCommit)&&Array.isArray(d.outputs));
+      }catch(error){failures.push(error.message);}
+    }
     for(const [reference,signature] of smokeContracts[owner]?.assets??[]) {
       try {
         const url=new URL(reference,pageURL);

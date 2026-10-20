@@ -15,3 +15,6 @@ export async function writeEventFiles(output) {
   await fs.mkdir(directory,{recursive:true});
   for(const event of eventNames) await fs.writeFile(path.join(directory,`${event}.txt`),'ok\n');
 }
+
+// Product switch stays off; planned names do not generate production endpoints.
+export const plannedCoinEvents=Object.freeze(['coin-select-mode','coin-select-team','coin-start','coin-complete','coin-recap','coin-copy']);

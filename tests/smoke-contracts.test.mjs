@@ -36,6 +36,17 @@ test('nested module imports use module URL while nested fetch uses document URL'
   assert.ok(f.seen.includes('/link/data/players.json'));
   assert.ok(!f.seen.includes('/link/assets/data/players.json'));
 });
+
+test('split Link snapshots require matching evidence and manifest versions',async()=>{
+ const bodies={
+  '/link/data/players.json':JSON.stringify({schemaVersion:1,dataVersion:'source-sha',players:[{id:'p'}]}),
+  '/link/data/link_graph.json':JSON.stringify({schemaVersion:1,dataVersion:'source-sha',adjacency:{p:[]},latestYear:{p:null}}),
+  '/link/data/link_evidence.json':JSON.stringify({schemaVersion:1,dataVersion:'source-sha',evidence:{}}),
+  '/link/data/manifest.json':JSON.stringify({schemaVersion:1,dataVersion:'source-sha',sourceCommit:'a'.repeat(40),outputs:[]})};
+ await smokeProduction({origin:'https://example.test',games,fetcher:mockSite(bodies).fetcher});
+ await assert.rejects(smokeProduction({origin:'https://example.test',games,fetcher:mockSite({...bodies,'/link/data/link_evidence.json':portalHTML}).fetcher}),/返回 HTML/);
+ await assert.rejects(smokeProduction({origin:'https://example.test',games,fetcher:mockSite({...bodies,'/link/data/link_evidence.json':JSON.stringify({schemaVersion:1,dataVersion:'wrong',evidence:{}})}).fetcher}),/数据结构/);
+});
 test('imported script event requests cannot escape telemetry barrier',async()=>{
   const f=mockSite({'/link/assets/chunk.js':'fetch("/__event/fake.json")'});
   await assert.rejects(smokeProduction({origin:'https://example.test',games,fetcher:f.fetcher}),/禁止请求产品统计事件/);

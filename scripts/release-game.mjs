@@ -8,6 +8,7 @@ import {checkGitAuth} from './check-git-auth.mjs';
 import {gitNetwork} from './git-network.mjs';
 import {completeRelease,releaseJournal} from './release-state.mjs';
 import {smokeBrowser} from './smoke-browser.mjs';
+import {gameValidation} from './game-validation.mjs';
 
 const args=process.argv.slice(2);
 const gameId=args.find(arg=>!arg.startsWith('--'));
@@ -112,14 +113,16 @@ async function main() {
   }
   const previousRemote=sourceAuth.remoteSha;
   record('game-remote-before',previousRemote);
-  stage('game-test');
-  run(game.build.test[0],game.build.test.slice(1),source);
-  record('game-test','passed');
   const packageFile=path.join(source,'package.json');
   const packageInfo=await readJSON(packageFile).catch(error=>{if(error.code==='ENOENT')return null;throw error;});
-  if(packageInfo?.scripts?.typecheck) {stage('game-typecheck');run('npm',['run','typecheck'],source);record('game-typecheck','passed');}
+  const plan=gameValidation(game,packageInfo);
+  stage('game-test');
+  run(plan.test[0],plan.test.slice(1),source);
+  record('game-test','passed');
+  if(plan.typecheck) {stage('game-typecheck');run(plan.typecheck[0],plan.typecheck.slice(1),source);record('game-typecheck','passed');}
+  if(plan.typecheckInBuild)record('game-typecheck','included in game-build (single execution)');
   stage('game-build');
-  if(game.build.type==='npm') run('npm',['run','build',...(game.build.args?.length?['--',...game.build.args]:[])],source);
+  if(plan.build)run(plan.build[0],plan.build.slice(1),source);
   else await fs.access(path.join(source,game.build.output,'index.html'));
   record('game-build','passed');
   let newRef=previousRemote;

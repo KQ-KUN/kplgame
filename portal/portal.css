@@ -60,6 +60,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .card-copy { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; }
 .card-copy strong { display: block; font-family: var(--font-display); font-size: 24px; font-weight: 700; line-height: 1.25; }
 .game-type { display: block; margin-top: 4px; color: var(--color-muted); font-size: 14px; line-height: 1.6; }
+.game-description { display:block; margin-top:4px; color:var(--color-text); font-size:14px; line-height:1.6; }
 .enter { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; padding: 8px 12px; border-radius: 4px; background: var(--accent); color: var(--color-on-accent); font-size: 16px; font-weight: 600; line-height: 1.5; transition: background-color 150ms ease-out; }
 .enter-label { display: inline; }
 .game-card:active { background: var(--color-surface-active); }
@@ -103,6 +104,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .utility-icon { flex-basis: 24px; width: 24px; height: 24px; }
 }
 @media (max-width: 767px) {
+  .card-copy strong[lang="en"] { font-size: clamp(20px, 6vw, 24px); overflow-wrap: normal; }
   .hub { padding: 12px 0; }
   .hero { padding-bottom: 16px; }
   .brand-name { margin-top: 4px; }

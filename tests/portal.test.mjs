@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import {renderGames,renderUtilities} from '../scripts/portal-view.mjs';
 
 test('game rows follow enabled registry order, paths and analytics markers',()=>{
-  const game={id:'demo',name:'KPL Demo',path:'/custom-route/',icon:'shared/demo.svg',category:'分类',accent:'blue',enabled:true};
+  const game={id:'demo',name:'KPL Demo',path:'/custom-route/',icon:'shared/demo.svg',category:'分类',description:'选择阵容 & 完成模拟',accent:'blue',enabled:true};
   const html=renderGames([{...game,enabled:false},game,{...game,id:'second',name:'<Test>',path:'/second/'}]);
   assert.equal((html.match(/class="game-card /g)||[]).length,2);
   assert.match(html,/data-game="demo" href="\/custom-route\/"/);
@@ -12,6 +12,7 @@ test('game rows follow enabled registry order, paths and analytics markers',()=>
   assert.match(html,/>02<\/span>/);
   assert.match(html,/>Demo<\/strong>/);
   assert.match(html,/&lt;Test&gt;/);
+  assert.match(html,/class="game-description">选择阵容 &amp; 完成模拟/);
   assert.ok(!html.includes('<button'));
 });
 

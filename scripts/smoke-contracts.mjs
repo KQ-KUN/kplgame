@@ -16,7 +16,7 @@ export const smokeContracts={
   ]},
   link:{markers:[/id=["']path-board["']/,/id=["']submit-path["']/],bundled:true,data:[
     ['data/players.json',d=>d.schemaVersion===1 && players(d)],
-    ['data/link_graph.json',d=>d.schemaVersion===1 && object(d.adjacency) && Object.keys(d.adjacency).length>0 && Object.values(d.adjacency).every(Array.isArray) && object(d.evidence)]
+    ['data/link_graph.json',d=>d.schemaVersion===1 && object(d.adjacency) && Object.keys(d.adjacency).length>0 && Object.values(d.adjacency).every(Array.isArray) && (object(d.evidence)||object(d.latestYear))]
   ]},
   // Merge's team snapshot is embedded in its bundle; browser smoke validates the rendered pool.
   merge:{markers:[/id=["']team-grid["']/,/id=["']arena["']/],bundled:true,data:[],assets:[

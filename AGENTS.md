@@ -12,7 +12,7 @@
 - 禁止擅自购买云服务、更改 DNS、删除历史数据或破坏现有 CloudBase 部署。
 - `sources/`、`dist/`、`reports/` 是忽略目录。不得提交凭据、本地路径、环境文件或游戏源码副本。
 - 注册表启用项必须构建和测试通过；发布前验证子路径、资源、移动交互及线上入口。构建成功不等于部署成功。
-- 旧 `portal/`、`guessing/` 的删除须在新站验收后另行决定。本轮不开发 Link。
+- 旧 `portal/`、`guessing/`、历史素材和 CloudBase 兼容链的删除需具体清单和用户授权。当前启用游戏为 2K、Guessing、Link、Merge、Coin，以 `config/games.json` 为准。
 
 ## 已有游戏的常规发布
 
@@ -22,3 +22,10 @@
 - 不为普通游戏更新改写 `docs/ACCEPTANCE.md`、`docs/DEPLOYMENT.md`、`docs/KPL_GAME_HANDOFF.md`；结果记录在忽略目录 `reports/release-latest.json`。
 - 正式版本没有更新时，先区分云任务缺失、状态未知、构建失败和版本未切换；只有可靠证据确认任务缺失且满足发布规范全部条件，才可沿原 Git 链路进行最多一次无文件变更的重试。保留两次提交、验收及回滚证据，不能无限重试或把未知写成成功。
 - 不得仅因 origin 使用 HTTPS 就要求用户配置 SSH、登录 GitHub 或运行终端命令。认证失败首先诊断执行上下文；只有正常用户上下文中的非交互 `git push --dry-run` 明确认证失败，才可返回 `AUTH_REQUIRED` 并要求重新认证。隔离上下文的 GCM 错误不能称为凭据失效；权限缺失、收费操作、破坏性数据操作或安全敏感操作按具体影响请用户介入。不得通过关闭安全设置或手动 EdgeOne 部署绕过失败。
+
+## 本地维护与回归
+
+- 现行规则与最短命令见 [维护入口](docs/MAINTENANCE.md)，数据共同字段见 [快照契约](docs/SNAPSHOT_CONTRACT.md)。build只消费已生成快照；原始同步、头像缓存与最终审计独立执行。
+- `npm test` 为逻辑/安全/发布恢复和各游戏逻辑测试；`build` 执行各游戏构建、可用manifest核验、收集及静态资源验证；`test:browser` 只访问本地聚合，webdriver加网络屏障禁止真实统计。不要在同一build后重复validate而无新变化。
+- Coin统计关闭是当前产品选择；未来事件在plannedCoinEvents中，未加入生产端点或helper白名单。各游戏完成事件必须在局/题/session边界去重，不由重绘或恢复触发。
+- `config/local-sources.json` 只做忽略的本地覆盖；不能把其构建报告称为注册表锁定版本或生产验收。
