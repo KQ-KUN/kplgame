@@ -19,5 +19,5 @@
   { "id": "grid", "name": "KPL Grid", "repo": "KQ-KUN/kpl-grid", "path": "/grid/", "category": "条件解谜", "description": "寻找符合条件的选手", "accent": "purple", "enabled": false },
   { "id": "draft", "name": "KPL Draft", "repo": "KQ-KUN/kpl-draft", "path": "/draft/", "category": "选秀", "description": "构建你的选秀阵容", "accent": "red", "enabled": false },
   { "id": "lineup", "name": "KPL Lineup", "repo": "KQ-KUN/kpl-lineup", "path": "/lineup/", "category": "阵容挑战", "description": "组合你的理想阵容", "accent": "blue", "enabled": false },
-  {"id": "coin", "name": "KPL Coin", "repo": "KQ-KUN/kpl-coin", "path": "/coin/", "category": "历史模拟", "description": "给你10,000枚硬币，重新走一遍KPL历史。", "accent": "red", "icon": "shared/coin-mark.svg", "ref": "425a57fb576bb791a7ed5c61026fc18df7ccfac2", "enabled": true, "build": {"type": "npm", "output": "dist", "test": ["npm", "test"]}}
+  {"id": "coin", "name": "KPL Coin", "repo": "KQ-KUN/kpl-coin", "path": "/coin/", "category": "历史模拟", "description": "给你10,000枚硬币，重新走一遍KPL历史。", "accent": "red", "icon": "shared/coin-mark.svg", "ref": "4048cdb12cccbe36821bb203a3ce5ffb50ef60e2", "enabled": true, "build": {"type": "npm", "output": "dist", "test": ["npm", "test"]}}
 ]
