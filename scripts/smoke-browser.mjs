@@ -55,7 +55,13 @@ export async function smokeBrowser({origin='https://kplgame.cn',games,chromium:p
       } else if(game.id==='link') {
         await page.locator('#game-content').waitFor({state:'visible'});
         await page.locator('[data-insert-index]').first().click();
-        await page.locator('#player-search').fill('Fly');
+        // Endpoints are deliberately excluded from search. Pick an available
+        // name so a randomly selected Fly endpoint cannot invalidate the smoke.
+        const available=page.locator('#player-options [role="option"]').first();
+        await available.waitFor({state:'visible'});
+        const searchName=(await available.locator('strong').textContent())?.trim();
+        if(!searchName)throw new Error('link: no searchable available player');
+        await page.locator('#player-search').fill(searchName);
         await page.locator('#player-options [role="option"]').first().waitFor();
         await page.locator('#player-search').press('ArrowDown');await page.locator('#player-search').press('Enter');
         await page.locator('.remove-node').waitFor();
@@ -129,6 +135,9 @@ export async function smokeBrowser({origin='https://kplgame.cn',games,chromium:p
     const guessing=entries.find(g=>g.id==='guessing');
     if(guessing) {
       const fault=await context.newPage();let fail=true;
+      // This recovery case needs a fresh round: the preceding guess may have
+      // won, in which case restoring its completed save correctly hides input.
+      await fault.addInitScript(()=>localStorage.clear());
       await fault.route('**/data/quiz_players.json',route=>fail?route.fulfill({status:503,body:'unavailable'}):route.continue());
       await fault.goto(new URL(guessing.path,origin).href);
       if(await fault.locator('[data-retry="classic"]').count()) {
