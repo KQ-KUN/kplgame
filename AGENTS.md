@@ -27,5 +27,5 @@
 
 - 现行规则与最短命令见 [维护入口](docs/MAINTENANCE.md)，数据共同字段见 [快照契约](docs/SNAPSHOT_CONTRACT.md)。build只消费已生成快照；原始同步、头像缓存与最终审计独立执行。
 - `npm test` 为逻辑/安全/发布恢复和各游戏逻辑测试；`build` 执行各游戏构建、可用manifest核验、收集及静态资源验证；`test:browser` 只访问本地聚合，webdriver加网络屏障禁止真实统计。不要在同一build后重复validate而无新变化。
-- Coin统计关闭是当前产品选择；未来事件在plannedCoinEvents中，未加入生产端点或helper白名单。各游戏完成事件必须在局/题/session边界去重，不由重绘或恢复触发。
+- Coin统计已于2026-10-27获用户批准启用；页面/入口及八个固定行为名在coinEvents中，必须与独立源码、helper及生产端点一致，聚合构建检查不得跳过。各游戏完成事件必须在局/题/session边界去重，不由重绘或恢复触发。
 - `config/local-sources.json` 只做忽略的本地覆盖；不能把其构建报告称为注册表锁定版本或生产验收。

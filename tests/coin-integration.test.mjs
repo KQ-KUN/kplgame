@@ -14,12 +14,12 @@ test('Coin is independently pinned at /coin/ with one local Portal entry',async(
   assert.match(await fs.readFile(new URL(`../public/${coin.icon}`,import.meta.url),'utf8'),/<svg /);
 });
 
-test('Coin aliases revalidate cache without enabling product event endpoints',async()=>{
+test('Coin aliases revalidate cache with approved fixed product event endpoints',async()=>{
   const config=JSON.parse(await fs.readFile(new URL('../edgeone.json',import.meta.url)));
   const rule=config.headers.find(r=>r.source==='/coin/*');
   assert.ok(rule.headers.some(h=>h.key==='Cache-Control'&&h.value==='public, max-age=0, must-revalidate'));
   for(const source of ['/coin','/coin/index.html']){
     assert.ok(config.redirects.some(r=>r.source===source&&r.destination==='/coin/'&&r.statusCode===302));
   }
-  assert.ok(!eventNames.some(e=>e==='pageview-coin'||e==='portal-click-coin'||e.startsWith('coin-')));
+  for(const name of ['pageview-coin','portal-click-coin','coin-start','coin-complete','coin-restart','coin-resume'])assert.ok(eventNames.includes(name));
 });

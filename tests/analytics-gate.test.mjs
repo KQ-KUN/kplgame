@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {validateAnalytics} from '../scripts/validate-analytics.mjs';
+test('aggregate gate rejects absent helper/page/hooks/switch and an undeclared new game',async t=>{
+  const out=await fs.mkdtemp(path.join(os.tmpdir(),'kpl-analytics-gate-'));t.after(()=>fs.rm(out,{recursive:true,force:true}));
+  await fs.mkdir(path.join(out,'shared'));await fs.mkdir(path.join(out,'coin'));
+  await fs.copyFile(new URL('../public/shared/analytics.js',import.meta.url),path.join(out,'shared/analytics.js'));
+  await fs.writeFile(path.join(out,'coin/index.html'),'<script src="/shared/analytics.js"></script>');
+  await fs.writeFile(path.join(out,'coin/game.js'),"['coin-start','coin-complete','coin-restart','coin-resume']");
+  await fs.writeFile(path.join(out,'coin/release.json'),JSON.stringify({analytics_enabled:true}));
+  const games=[{id:'coin',path:'/coin/'}];assert.deepEqual(await validateAnalytics(out,games),[]);
+  await fs.writeFile(path.join(out,'coin/game.js'),"['coin-start']");assert.ok((await validateAnalytics(out,games)).some(e=>e.includes('missing business hook complete')));
+  await fs.writeFile(path.join(out,'coin/release.json'),JSON.stringify({analytics_enabled:false}));assert.ok((await validateAnalytics(out,games)).some(e=>e.includes('switch disabled')));
+  await fs.writeFile(path.join(out,'coin/index.html'),'');assert.ok((await validateAnalytics(out,games)).some(e=>e.includes('injected helper')));
+  await fs.mkdir(path.join(out,'newgame'));await fs.writeFile(path.join(out,'newgame/index.html'),'');
+  assert.ok((await validateAnalytics(out,[{id:'newgame',path:'/newgame/'}])).some(e=>e.includes('necessary-event contract')));
+});

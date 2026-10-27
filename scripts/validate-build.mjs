@@ -3,6 +3,7 @@ import path from 'node:path';
 import {root,dist,files,registry} from './common.mjs';
 import {auditHtml,auditScript,auditStylesheet,expectedHeaders} from './runtime-security.mjs';
 import {eventNames} from './analytics-events.mjs';
+import {validateAnalytics} from './validate-analytics.mjs';
 
 export function resolveAsset(base, reference, output=dist) {
   if (!reference || /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(reference)) return null;
@@ -16,7 +17,7 @@ export function resolveAsset(base, reference, output=dist) {
 export async function validate(output=dist) {
   const games=(await registry()).filter(g=>g.enabled);
   const all=await files(output);
-  const errors=[], external=new Set();
+  const errors=await validateAnalytics(output,games), external=new Set();
   for(const event of eventNames) {
     const endpoint=path.join(output,'__event',`${event}.txt`);
     if((await fs.readFile(endpoint,'utf8').catch(()=>null))!=='ok\n') errors.push(`缺少 analytics endpoint: ${event}`);

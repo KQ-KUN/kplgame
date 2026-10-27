@@ -42,7 +42,7 @@ test('build writes every fixed endpoint with only ok content',async()=>{
 });
 
 test('pageview is once per document and webdriver sends nothing',()=>{
-  for(const [path,name] of [['/','portal'],['/kpl2k/','kpl2k'],['/guessing/','guessing'],['/link/','link'],['/merge/','merge']]) {
+  for(const [path,name] of [['/','portal'],['/kpl2k/','kpl2k'],['/guessing/','guessing'],['/link/','link'],['/merge/','merge'],['/coin/','coin']]) {
     const page=load(path);
     assert.deepEqual(page.calls.map(call=>call.url),[`/__event/pageview-${name}.txt`]);
     assert.equal(page.window.KPLAnalytics.trackPageView(name),false);
@@ -91,7 +91,7 @@ test('production smoke never requests event paths and CSP stays same-origin',asy
 });
 
 test('all Portal game rows preserve click event names without intercepting navigation',()=>{
-  for(const id of ['kpl2k','guessing','link','merge']) {
+  for(const id of ['kpl2k','guessing','link','merge','coin']) {
     const run=load();
     const target=new run.context.Element();
     target.closest=selector=>{

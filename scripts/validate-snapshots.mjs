@@ -3,7 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {root,registry,sourceFor,inside} from './common.mjs';
-import {plannedCoinEvents} from './analytics-events.mjs';
+import {coinEvents} from './analytics-events.mjs';
 
 export const snapshotPaths={kpl2k:'app/data/consumption-manifest.json',guessing:'public/data/snapshot_manifest.json',link:'public/data/manifest.json',merge:'public/data/manifest.json',coin:'data/consumption-manifest.json'};
 export async function validateSnapshot(source,relative) {
@@ -41,8 +41,8 @@ export async function validateSnapshots({strict=false}={}) {
   catch(error){if(error.code==='ENOENT' && !strict)results.push({id:game.id,status:'legacy-unverified',reason:'locked legacy source has no shared manifest; coordinated game release required'});else throw error;}
   if(game.id==='coin') {
     const coin=await import(pathToFileURL(path.join(source,'src/analytics.mjs')).href);
-    if(coin.ANALYTICS_ENABLED!==false || JSON.stringify(coin.COIN_EVENTS)!==JSON.stringify(plannedCoinEvents))throw new Error('Coin analytics switch/planned platform contract mismatch');
-    results.at(-1).analytics='disabled product switch; planned events match platform';
+    if(coin.ANALYTICS_ENABLED!==true || JSON.stringify(coin.COIN_EVENTS)!==JSON.stringify(coinEvents.filter(n=>n.startsWith('coin-'))))throw new Error('Coin analytics enabled/platform contract mismatch');
+    results.at(-1).analytics='enabled product switch; active events match platform';
   }
  }
  await fs.mkdir(path.join(root,'reports'),{recursive:true});

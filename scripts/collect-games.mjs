@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {root,dist,registry,sourceFor,readJSON,escapeHTML as e,run,inside} from './common.mjs';
-import {writeEventFiles} from './analytics-events.mjs';
+import {writeEventFiles,eventNames} from './analytics-events.mjs';
 import {renderGames,renderUtilities} from './portal-view.mjs';
 
 const games=(await registry()).filter(g=>g.enabled);
@@ -54,6 +54,6 @@ if(!/^[a-f0-9]{40}$/.test(platformCommit)) throw new Error('无法读取平台 c
 const localValidation=manifest.some(g=>g.actualRef!==g.expectedRef || g.dirty);
 await fs.writeFile(path.join(dist,'release-meta.json'),JSON.stringify({schemaVersion:1,platformCommit,
   validationMode:localValidation?'local-working-tree':'locked-refs',
-  games:Object.fromEntries(games.map(g=>[g.id,g.ref])),
+  analyticsEvents:eventNames, games:Object.fromEntries(games.map(g=>[g.id,g.ref])),
   gameSources:Object.fromEntries(manifest.map(g=>[g.id,{actualRef:g.actualRef,dirty:g.dirty}]))},null,2)+'\n');
 console.log(`已收集 ${games.length} 个独立游戏到 dist/`);
